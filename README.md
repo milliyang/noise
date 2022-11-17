@@ -19,7 +19,6 @@ Features
 * Support different ways of Backtest (SimpleBroker/BrokerMuxer/EventDriven/PreProcessed)
 * Cheap Detailed results
 * Cheap visualizations
-* Has noting to do with noise or denoise
 
 
 Requirements
