@@ -23,6 +23,7 @@ Requirements
 ------------
 ```
 - OpenMP [Optional]     maximize 48+ Cores to run
+- Qt [Option]           for GUI ploting
 - GCC
 - CMAKE
 - No "extra" libs, except for those tiny one already included in directory: noise/src/3rd
