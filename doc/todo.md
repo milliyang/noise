@@ -55,34 +55,17 @@ TODO LIST (20220529)
 ```
 
 
-### Note:
-```
-    Stat:
-        - 计算每个阶段的Stat股票价值+现金 （用于数据Plotting分析）
-            - 在每个Bar后计算，还是所有Bar完成后计算
-
-        - 
-
-
-```
-
-
 
 ###
 ```
 tushare
 
 https://github.com/cttn/Stockex
-
 https://github.com/milliyang/yfinance
-
 
 http://baostock.com/baostock/index.php/%E9%A6%96%E9%A1%B5
 
-
 https://www.akshare.xyz/index.html
-
-
 
 
 pip install akshare mplfinance
