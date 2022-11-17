@@ -1,7 +1,5 @@
 Noise
 =====
-[toc]
-
 A Backtest or Trading Framework with C++
 
 
