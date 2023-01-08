@@ -24,7 +24,8 @@ PtrIndicator Data::create_indicator(const std::string &name)
     indi->gamma = "linear";
     indi->shown_on_mouse = 1;
     indi->extra.ptime = m_times;
-    m_indicators.push_back(indi);
+
+    m_indicators.emplace(name, indi);
     return indi;
 }
 
@@ -48,7 +49,7 @@ void Data::init_default_indicators(std::vector<struct bar> &bars)
     auto high   = create_indicator(INDICATOR_HIGH);
     auto low    = create_indicator(INDICATOR_LOW);
     auto close  = create_indicator(INDICATOR_CLOSE);
-    auto v      = create_indicator(INDICATOR_VOLUME);
+    auto vol    = create_indicator(INDICATOR_VOLUME);
     auto chg    = create_indicator(INDICATOR_CHANGES);
     auto pnl    = create_indicator(INDICATOR_PNL);
 
@@ -56,27 +57,27 @@ void Data::init_default_indicators(std::vector<struct bar> &bars)
         const auto &bar = *it;
         m_times->time.push_back(bar.time);
 
-        date->data.push_back(bar.time);
+        date->data.push_back((float)bar.time);
         open->data.push_back(bar.open);
         high->data.push_back(bar.high);
         low->data.push_back(bar.low);
         close->data.push_back(bar.close);
-        v->data.push_back(bar.volumn);
+        vol->data.push_back(bar.volumn);
         chg->data.push_back(bar.pct_chg);
 
-        LOGD("--xohlc:%f %f %f %f\n", bar.open, bar.high, bar.low, bar.close);
+        //LOGD("--xohlc:%f %f %f %f\n", bar.open, bar.high, bar.low, bar.close);
     }
-    LOGD("bar_len:%ld\n", date->data.size());
+    LOGD("bar_len:%d\n", (int)date->data.size());
 }
 
 PtrIndicator Data::find_indicator(const std::string &name)
 {
-    for (int i = 0; i < m_indicators.size(); i++) {
-        if (m_indicators.at(i)->name == name) {
-            return m_indicators.at(i);
-        }
+    auto it = m_indicators.find(name);
+    if (it != m_indicators.end()) {
+        return it->second;
+    } else {
+        return nullptr;
     }
-    return nullptr;
 }
 
 bool Data::is_support_preload(void)
@@ -90,9 +91,14 @@ void Data::plot(void)
 
     if (m_func_plot) {
         auto ploter = m_func_plot();
-        ploter->plot("default", m_indicators);
+
+        //TODO: use map
+        std::vector<PtrIndicator> ind;
+        for (auto const it : m_indicators) {
+            ind.push_back(it.second);
+        }
+        ploter->plot("default", ind);
     }
 }
-
 
 }

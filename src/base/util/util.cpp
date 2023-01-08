@@ -7,7 +7,7 @@
 namespace noise {
 
 
-void util::parse_csv_bars_file(std::vector<struct bar> &v_bars, const std::string &filepath)
+void util::parse_csv_bars_file(std::vector<struct bar> &bars, const std::string &filepath)
 {
     std::ifstream input{filepath};
 
@@ -21,14 +21,11 @@ void util::parse_csv_bars_file(std::vector<struct bar> &v_bars, const std::strin
         return;
     }
 
-    std::vector<std::vector<std::string>> csvRows;
-
     int cnt = 0;
     int column = 0;
 
     int    cache_date = -1;
     time_t cache_time;
-
 
     for (std::string line; std::getline(input, line);) {
         std::istringstream ss(std::move(line));
@@ -37,16 +34,17 @@ void util::parse_csv_bars_file(std::vector<struct bar> &v_bars, const std::strin
         for (std::string value; std::getline(ss, value, ',');) {
             one_row.push_back(std::move(value));
         }
-        if (cnt == 0) {
+        if (column == 0) {
             if (one_row.at(0) != "trade_date") {
                 std::cerr << "Couldn't parse line: " << line << "\n";
                 return;
             }
-            column = one_row.size();
+            column = (int) one_row.size();
+            continue;
             //printf("bars column:%d\n", (int)one_row.size());
         } else {
             if (column != one_row.size()) {
-                std::cerr << "ignore bar volumn:" << one_row.size() << " " << line << "\n";
+                std::cerr << "ignore bar; volumn:" << one_row.size() << " " << line << "\n";
                 continue; //ignore
             }
 
@@ -73,7 +71,7 @@ void util::parse_csv_bars_file(std::vector<struct bar> &v_bars, const std::strin
             //printf("bar_time date:%d  ", bar.date);
             //uprint::print("bar_time read_bar", bar);
             //uprint::print("bar_time", bar.time);
-            v_bars.push_back(bar);
+            bars.push_back(bar);
         }
         cnt++;
 

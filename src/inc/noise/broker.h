@@ -10,8 +10,8 @@ class Position;
 
 struct broker_config {
     float   commission;
-    int     hedging;
-    int     trade_on_close;
+    bool    hedging;
+    bool    trade_on_close;
 };
 
 class Broker {
@@ -25,7 +25,7 @@ public:
 public:
     void process(const struct bar &bar);
     void close(void);
-    void init(void);
+    void init(const struct broker_config &cfg);
 
     void close_position(void);
 

@@ -121,11 +121,17 @@ struct trade {
     float       exit_price;
     time_t      exit_time;
     float       PNL; //Profit-And-Loss when closed
+    bool        hedging;
 
     bool is_long(void)  const { return size > 0 ? true:false; }
     bool is_short(void) const { return size < 0 ? true:false; }
     bool is_closed(void) const { return exit_time > 0 ? true:false; }
     void set_closed(time_t bar_time) { exit_time = bar_time; }
+    float profit (void) const {
+        float ratio = (exit_price - entry_price) / entry_price;
+        if (size < 0) { ratio *=-1.0f; }
+        return ratio;
+    }
 };
 
 struct stat {

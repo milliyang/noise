@@ -7,8 +7,8 @@ namespace noise
 {
 
 enum BT_MODE {
-    BT_MODE_DEFAULT = 0,        // 1:1; one code one instance
-    BT_MODE_FUSION,             // n:1; multi code on one instance
+    BT_MODE_ONE2ONE = 0,       // 1:1; one code one instance
+    BT_MODE_M2ONE,             // n:1; multi code on one instance
 };
 
 struct bt_func {
@@ -39,7 +39,7 @@ private:
 
     void load_config(std::string filepath);
 
-    void make_strategy(int id, struct BtContext &context, const std::shared_ptr<Strategy> &strategy);
+    void make_strategy(uint32_t id);
     void run_strategy(const struct BtContext &context);
 
     //

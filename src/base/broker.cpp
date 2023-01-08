@@ -86,32 +86,42 @@ void Broker::process_order(void)
         int need_size = size;
 
         if (!m_config.hedging) {
-            for (auto it_trade = m_trades_active.begin(); it_trade != m_trades_active.end(); ++it_trade) {
-                if (it_trade->is_closed()) { continue; }
+            int preprocess = 1; //preprocess the order & trade with the same date
+            do {
+                if (need_size == 0) { break; } //bugfix
 
-                //the same direction, use a new order
-                if (it_trade->is_long() && order.is_long()) {
-                    continue;
-                }
-                if (it_trade->is_short() && order.is_short()) {
-                    continue;
-                }
+                for (auto it_trade = m_trades_active.begin(); it_trade != m_trades_active.end(); ++it_trade) {
+                    if (it_trade->is_closed()) { continue; }
+                    if (preprocess) {
+                        if (it_trade->entry_time != m_cur_bar.time) {
+                            continue;
+                        }
+                    }
 
-                // Order size greater than this opposite-directed existing trade,
-                // so it will be closed completely
-                if (std::abs(need_size) >= std::abs(it_trade->size)) {
-                    need_size += it_trade->size;
-                    close_a_trade(*it_trade, cur_price, m_cur_bar.time);
-                } else {
-                    // The existing trade is larger than the new order,
-                    // so it will only be closed partially
-                    reduce_a_trade(*it_trade, cur_price, need_size, m_cur_bar.time);
-                    need_size = 0;
+                    //the same direction, use a new order
+                    if (it_trade->is_long() && order.is_long()) {
+                        continue;
+                    }
+                    if (it_trade->is_short() && order.is_short()) {
+                        continue;
+                    }
+
+                    // Order size greater than this opposite-directed existing trade,
+                    // so it will be closed completely
+                    if (std::abs(need_size) >= std::abs(it_trade->size)) {
+                        need_size += it_trade->size;
+                        close_a_trade(*it_trade, cur_price, m_cur_bar.time);
+                        it_trade->hedging = true;
+                    } else {
+                        // The existing trade is larger than the new order,
+                        // so it will only be closed partially
+                        reduce_a_trade(*it_trade, cur_price, need_size, m_cur_bar.time);
+                        need_size = 0;
+                    }
+                    if (need_size == 0) { break; }
                 }
-                if (need_size == 0) {
-                    break;
-                }
-            }
+                
+            } while (preprocess--);
 
             //remove closed trades
             for (auto it_trade = m_trades_active.begin(); it_trade != m_trades_active.end(); /*++it_trade*/) {
@@ -132,6 +142,11 @@ void Broker::process_order(void)
 
     //cleanup
     m_orders_active.clear();
+}
+
+void Broker::init(const struct broker_config &cfg)
+{
+    m_config = cfg;
 }
 
 void Broker::close(void)
@@ -208,7 +223,7 @@ void Broker::place_a_order(struct order& order)
     //todo:
     // must provide code namw with broker processing multiple code bar
     int code_num = 1;
-    int bt_mode = BT_MODE_DEFAULT;
+    int bt_mode = BT_MODE_ONE2ONE;
     if (order.code.length()) {
         if (bt_mode == bt_mode && code_num > 1) {
             assert("must provide code name\n");
@@ -264,6 +279,7 @@ void Broker::reduce_a_trade(struct trade& trade, float price, int size, time_t t
 
     struct trade one_trade = trade;
     one_trade.size = -size;
+    one_trade.hedging = true;
     close_a_trade(one_trade, price, time);
 
     //

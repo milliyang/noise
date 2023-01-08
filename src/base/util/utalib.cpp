@@ -1,9 +1,10 @@
 #include "noise/def.h"
 #include "noise/util.h"
+#include <queue>
 
 namespace noise {
 
-void utalib::ma(std::vector<float> &ma_values, const std::vector<float> &values, int period)
+void utalib::ma2(std::vector<float> &ma_values, const std::vector<float> &values, int period)
 {
     assert(period > 0);
     int idx_ma = (int)ma_values.size();  //resume from this idx
@@ -11,7 +12,7 @@ void utalib::ma(std::vector<float> &ma_values, const std::vector<float> &values,
         float sum = 0;
         for (int idx = idx_ma-period+1; idx <= idx_ma; idx++) {
             if (idx < 0) {
-                sum = std::nanf("");
+                sum = NAN;
                 break;
             } else {
                 sum += values.at(idx);
@@ -19,6 +20,32 @@ void utalib::ma(std::vector<float> &ma_values, const std::vector<float> &values,
         }
         sum /= period;
         ma_values.push_back(sum);
+    }
+}
+
+void utalib::ma(std::vector<float> &ma_values, const std::vector<float> &values, int period)
+{
+    assert(period > 0);
+    assert(ma_values.size() == 0);
+    const int MOD = period + 1;
+    std::vector<float> fifo;
+    fifo.reserve(MOD);
+
+    float sum = 0;
+    int idx = 0;
+    for (int i = 0; i < MOD; i++) {
+        fifo.push_back(0.0f);
+    }
+    for (const auto it: values) {
+        fifo[idx% MOD] = it;    //push
+        idx++;                  //advance
+        sum += it;
+        sum -= fifo[idx % MOD]; //pop
+        ma_values.push_back(sum/period);
+    }
+
+    for (int i = 0; i < (period-1); i++) {
+        ma_values[i] = NAN;
     }
 }
 
@@ -55,11 +82,10 @@ void utalib::stddev(std::vector<float> &stddev_values, const std::vector<float> 
         float sum = 0;
         for (int idx = idx_resume-period+1; idx <= idx_resume; idx++) {
             if (idx < 0) {
-                sum = std::nanf("");
+                sum = NAN;
             } else {
-
                 float v = values.at(idx) - means.at(idx_resume);
-                sum += (v * v);
+                sum += powf(v,2);
             }
         }
         sum = std::sqrt(sum / period);
@@ -71,7 +97,6 @@ void utalib::boll(std::vector<float> &high, std::vector<float> &mid, std::vector
                 const std::vector<float> &values, int period,
                 float ratio)
 {
-
     assert(high.size() == mid.size());
     assert(low.size() == mid.size());
     if (ratio <= 0) {ratio = 1.0f;}

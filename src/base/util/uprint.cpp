@@ -5,18 +5,25 @@
 
 namespace noise {
 
+#if 1
+#define DEBUG_OFF   return;
+#else
+#define DEBUG_OFF
+#endif
 
 void uprint::print(const char *tag, const struct trade &trade)
 {
-    float ratio = 0;
+    DEBUG_OFF
+
+    float ratio = 0.0f;
     int exit_date = 0;
 
-    if (trade.is_closed() > 0) {
+    if (trade.is_closed()) {
         exit_date = utime::get_date(trade.exit_time);
-        ratio = (trade.exit_price - trade.entry_price) / trade.entry_price;
+        ratio = trade.profit();
     }
 
-    printf("[%s] code:%s size:%5d entry(%.2f %d) exit(%.2f %d) PNL:%+7.2f profit:%+7.2f%%\n",
+    printf("[%s] code:%s %5d entry(%.2f %d) exit(%.2f %d) PNL:%+7.2f profit:%+7.2f%%\n",
         tag,
         trade.code.c_str(),
         trade.size,
@@ -62,6 +69,8 @@ void uprint::print(const char*tag, const std::vector<std::string> &strings)
 
 void uprint::print(const char *tag, const struct order &order)
 {
+    DEBUG_OFF
+
     printf("[%s] code:%s size:%5d price:%.2f type:%d\n",
         tag,
         order.code.c_str(),
@@ -72,6 +81,8 @@ void uprint::print(const char *tag, const struct order &order)
 
 void uprint::print(const char *tag, const struct bar &bar)
 {
+    DEBUG_OFF
+
 #if 0
     printf("[%s] date:%d, %s, ohlc:%7.3f,%7.3f,%7.3f,%7.3f, %0.2f,%0.2f,%0.2f,%0.2f, amount:%0.2f\n",
         tag,

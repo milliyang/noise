@@ -17,6 +17,12 @@ int umath::sum(const std::vector<int> &values)
     return sum;
 }
 
+float umath::mean(const std::vector<int> &values)
+{
+    if (values.size() <= 0) { return 0; }
+    return (float)umath::sum(values) / (float) values.size();
+}
+
 float umath::sum(const std::vector<float> &values)
 {
     float sum = 0;
@@ -36,8 +42,7 @@ float umath::mean(const std::vector<float> &values)
 float umath::stddev(const std::vector<float> &values)
 {
     if (values.size() <= 0) { return 0; }
-    float sum = umath::sum(values);
-    float mean = sum / values.size();
+    float mean = umath::mean(values);
 
     float delta = 0;
     for (auto it = values.begin(); it != values.end(); ++it) {

@@ -4,6 +4,7 @@
 
 namespace noise
 {
+
 namespace util {
     void parse_csv_bars_file(std::vector<struct bar> &v_bars, const std::string &filepath);
 }
@@ -29,6 +30,7 @@ namespace umath {
 
     //don't use template
     int sum(const std::vector<int> &values);
+    float mean(const std::vector<int> &values);
     void test_nanf(void);
 }
 
@@ -46,6 +48,7 @@ namespace utime {
 
 namespace utalib {
     void ma(std::vector<float> &ma_values,          const std::vector<float> &values, int period);
+    void ma2(std::vector<float> &ma_values,         const std::vector<float> &values, int period);
     void max(std::vector<float> &max_values,        const std::vector<float> &values, int period);
     void stddev(std::vector<float> &stddev_values,  const std::vector<float> &values, int period); /*stddev.p*/
 

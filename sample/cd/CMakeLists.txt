@@ -80,3 +80,9 @@ target_link_libraries(bt ${LinuxLib} ${OPENMP_LIB} ${CMAKE_DL_LIBS} ${PLOT_LIB})
 
 # install(TARGETS ${PROJECT_NAME} DESTINATION "${ROOT_DIR}/Bin/${TARGET_OS}")
 
+include_directories("${NOISE_DIR}/src/tests")
+file(GLOB TEST_SRC "${NOISE_DIR}/src/tests/*.cpp"
+)
+
+add_executable(test  ${TEST_SRC} ${NOISE_SRC} ${PLOT_SRC} )
+target_link_libraries(test ${LinuxLib} ${OPENMP_LIB} ${CMAKE_DL_LIBS} ${PLOT_LIB})

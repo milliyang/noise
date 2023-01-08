@@ -73,13 +73,13 @@ void Stat::process(void)
     float best_trade_on_ratio, worst_trade_on_ratio;
     float avg_profit_ratio = 0;
     std::vector<float> vec_pnl;
-    std::vector<float> vec_duration;
+    std::vector<int> vec_duration;  //second
     std::vector<int> vec_exposure;
-    float max_duration = 0;
+    int max_duration = 0;           //second
 
-    const auto &the_1st_trade = *trades.begin();
-    best_trade_on_pnl = worst_trade_on_pnl = the_1st_trade.PNL;
-    best_trade_on_ratio = worst_trade_on_ratio = (the_1st_trade.exit_price - the_1st_trade.entry_price) / the_1st_trade.entry_price;
+    const auto &trade0 = *trades.begin();
+    best_trade_on_pnl = worst_trade_on_pnl = trade0.PNL;
+    best_trade_on_ratio = worst_trade_on_ratio = trade0.profit();
 
     m_stat.start_time = first_bar.time;
     m_stat.end_time = last_bar.time;
@@ -116,16 +116,16 @@ void Stat::process(void)
             worst_trade_on_pnl = trade.PNL;
         }
 
-        float profit_ratio = (trade.exit_price - trade.entry_price) / trade.entry_price;
-        if (best_trade_on_ratio < profit_ratio) {
-            best_trade_on_ratio = profit_ratio;
+        float profit = trade.profit();
+        if (best_trade_on_ratio < profit) {
+            best_trade_on_ratio = profit;
         }
-        if (worst_trade_on_ratio > profit_ratio) {
-            worst_trade_on_ratio = profit_ratio;
+        if (worst_trade_on_ratio > profit) {
+            worst_trade_on_ratio = profit;
         }
-        avg_profit_ratio += profit_ratio;
+        avg_profit_ratio += profit;
 
-        float dura = trade.exit_time - trade.entry_time;
+        int dura = (int)(trade.exit_time - trade.entry_time);
         if (max_duration < dura) {
             max_duration = dura;
         }
@@ -149,7 +149,7 @@ void Stat::process(void)
     m_stat.exposure_time = (float) exposion_days / (float) m_stat.duration;
 
     //
-    m_stat.trade_cnt = trades.size();
+    m_stat.trade_cnt = (int) trades.size();
     m_stat.equity_final = enquity_base+m_stat.PNL;
     m_stat.return_final = m_stat.PNL / enquity_base;
     m_stat.return_buy_and_hold = (last_bar.close - first_bar.open) / first_bar.open;
@@ -161,14 +161,14 @@ void Stat::process(void)
     m_stat.avg_trade = avg_profit_ratio / trades.size();
 
     //convert second to duration
-    m_stat.avg_trade_duration = umath::mean(vec_duration);
-    m_stat.max_trade_duration = max_duration;
+    m_stat.avg_trade_duration = (float) umath::mean(vec_duration);
+    m_stat.max_trade_duration = (float) max_duration;
 
-    m_stat.avg_trade_duration = utime::get_duration(m_stat.avg_trade_duration);
-    m_stat.max_trade_duration = utime::get_duration(m_stat.max_trade_duration);
+    m_stat.avg_trade_duration = (float) utime::get_duration((time_t)m_stat.avg_trade_duration);
+    m_stat.max_trade_duration = (float) utime::get_duration((time_t)m_stat.max_trade_duration);
 
     //
-    m_stat.SQN = sqrtf(trades.size()) * umath::mean(vec_pnl) / umath::stddev(vec_pnl);
+    m_stat.SQN = sqrtf((float)trades.size()) * umath::mean(vec_pnl) / umath::stddev(vec_pnl);
     //s.loc['SQN'] = np.sqrt(n_trades) * pl.mean() / (pl.std() or np.nan)
 
 

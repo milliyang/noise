@@ -14,12 +14,14 @@
 
 namespace noise {
 
-Backtest::Backtest(void)
+Backtest::Backtest(void):
+    m_build_date(__DATE__)
 {   
     m_func_get_stragegy = [](){ return std::make_shared<StrategyABC>(); };
 }
 
-Backtest::Backtest(FuncStrategy func)
+Backtest::Backtest(FuncStrategy func):
+    m_build_date(__DATE__)
 {
     m_func_get_stragegy = func;
 }
@@ -29,8 +31,9 @@ Backtest::~Backtest(void)
     //std::cout << __FUNCTION__ << std::endl;
 }
 
-void Backtest::make_strategy(int id, struct BtContext &ctx, const std::shared_ptr<Strategy> &strategy)
+void Backtest::make_strategy(uint32_t id)
 {
+    struct BtContext ctx;
     ctx.broker = std::make_shared<Broker>();
     ctx.stat   = std::make_shared<Stat>();
     ctx.feed   = std::make_shared<FeedCSV>();
@@ -38,17 +41,15 @@ void Backtest::make_strategy(int id, struct BtContext &ctx, const std::shared_pt
     ctx.data   = std::make_shared<Data>();
     ctx.stat->init(ctx.broker);
 
+    ctx.strategy = m_func_get_stragegy();
+    ctx.strategy->set_id(id);
+    ctx.strategy->init(ctx.broker);
+    ctx.strategy->set_context(ctx);
 
-    if (strategy.get() == nullptr) {
-        ctx.strategy = m_func_get_stragegy();
-    } else {
-        ctx.strategy = strategy;
+    if (id == 0) {
+        ctx.strategy->on_create(m_config);
     }
-    if (ctx.strategy) {
-        ctx.strategy->set_id(id);
-        ctx.strategy->init(ctx.broker);
-        ctx.strategy->set_context(ctx);
-    }
+    ctx.broker->init(m_config.broker);
 
     //todo:
     struct feed_config cfg = m_config.feed;
@@ -58,6 +59,9 @@ void Backtest::make_strategy(int id, struct BtContext &ctx, const std::shared_pt
     //after feed init
     ctx.data->init(ctx.broker, ctx.feed, m_config.plot);
     ctx.data->setup_plot(m_config.func.plot);
+
+    m_v_context.push_back(ctx);
+    if (id == 0) { m_context = ctx; }
 
     TRACE_LINE
 }
@@ -84,41 +88,28 @@ void Backtest::run_strategy(const struct BtContext &ctx)
     ctx.broker->close();
     ctx.stat->process();
 
-    ctx.strategy->on_finish();
     ctx.stat->plot();
+    ctx.strategy->on_finish();
 }
 
 void Backtest::init(void)
 {
-    m_build_date == __DATE__;
+    m_config.mode = BT_MODE_ONE2ONE;
 
-    m_config.mode == BT_MODE_DEFAULT;
+    make_strategy(0);
+    assert(m_v_context.size() == 1);
 
-    std::shared_ptr<Strategy> first_strategy = m_func_get_stragegy();
-    first_strategy->on_create(m_config);
-    assert(m_config.codes.size() >= 1);
-
-    if (m_config.codes.size() == 1) {
-        m_config.mode = BT_MODE_DEFAULT;
-    }
 
     int strategy_context_num;
-    if (m_config.mode == BT_MODE_DEFAULT) {
+    if (m_config.mode == BT_MODE_ONE2ONE) {
         strategy_context_num = 1;
     } else {
-        strategy_context_num = m_config.codes.size();
+        strategy_context_num = (int) m_config.codes.size();
     }
     uprint::print("subscribe code", m_config.codes);
 
-    for (int i = 0; i < strategy_context_num; i++) {
-        struct BtContext ctx;
-        if (i == 0) {
-            make_strategy(i, ctx, first_strategy);
-            m_context = ctx;
-        } else {
-            make_strategy(i, ctx, nullptr);
-        }
-        m_v_context.push_back(ctx);
+    for (int i = 1; i < strategy_context_num; i++) {
+        make_strategy(i);
     }
 }
 
@@ -149,7 +140,7 @@ void Backtest::run()
 
     init();
 
-    if (m_config.mode == BT_MODE_DEFAULT) {
+    if (m_config.mode == BT_MODE_ONE2ONE) {
         run_strategy(m_context);
     } else {
 #ifdef __SUPPORT_OPENMP_TASK__

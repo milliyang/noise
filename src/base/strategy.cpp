@@ -31,6 +31,9 @@ void Strategy::init(std::shared_ptr<Broker> broker)
 void Strategy::send_order(struct order& order)
 {
     TRACE_LINE
+    if (order.type == noise::ORDER_T_MARKET) {
+        order.price = NAN;
+    }
     if (m_broker.get() != nullptr) {
         m_broker->place_a_order(order);
     }
@@ -73,7 +76,7 @@ void StrategyABC::on_create(struct bt_config &cfg)
     TRACE_LINE;
     TRACE_NEWLINE;
 
-    cfg.mode = noise::BT_MODE_DEFAULT;
+    cfg.mode = noise::BT_MODE_ONE2ONE;
     cfg.codes = {"000004.SZ"};
 }
 

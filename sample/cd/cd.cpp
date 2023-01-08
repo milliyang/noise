@@ -28,7 +28,7 @@ void StrategyCD::on_create(struct noise::bt_config &cfg)
      *   - register your ploting lib
      */
     //cfg.mode = noise::BT_MODE_ISOLATION;
-    cfg.mode = noise::BT_MODE_DEFAULT;
+    cfg.mode = noise::BT_MODE_ONE2ONE;
     cfg.codes = {"000004.SZ"};
 #if 0
     for (int i = 0; i < 10; i++) {
@@ -36,9 +36,9 @@ void StrategyCD::on_create(struct noise::bt_config &cfg)
     }
 #endif
 
-    cfg.broker.commission = 0.002;
-    cfg.broker.hedging = 1;
-    cfg.broker.trade_on_close = 1;
+    cfg.broker.commission = 0.002f;
+    cfg.broker.hedging = false;
+    cfg.broker.trade_on_close = true;
     //
     //cfg.feed.root_path = "/home/leo/tmpfs/root";
     cfg.feed.root_path = "/home/leo/work/root";
@@ -137,12 +137,14 @@ void StrategyCD::on_bar_recv(const struct noise::bar &bar)
 
     {
         struct noise::order order;
+        order.type = noise::ORDER_T_MARKET;
         order.size = 100;
         send_order(order);
     }
 
     {
         struct noise::order order;
+        order.type = noise::ORDER_T_MARKET;
         order.size = -10;
         send_order(order);
     }
