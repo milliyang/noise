@@ -16,21 +16,18 @@ Features
 * Composable Strategies / Broker / Feed / Ploting
 * Support different ways of Backtest (SimpleBroker/BrokerMuxer/EventDriven/PreProcessed)
 * Cheap Detailed results
-* Cheap visualizations
-
+* Cheap Visualizations
+* Cheap Talib
 
 Requirements
 ------------
-```
 - OpenMP [Optional]     maximize 48+ Cores to run
 - Qt [Option]           for GUI ploting
 - GCC
 - CMAKE
 - Tiny 3rd lib in: noise/src/3rd
-    - [spdlog](https://github.com/gabime/spdlog) & [fmt](https://github.com/fmtlib/fmt)
-    - talib
-```
-
+    - [spdlog](https://github.com/gabime/spdlog) 
+    - [fmt](https://github.com/fmtlib/fmt)
 
 Build on Linux
 --------------
@@ -101,7 +98,7 @@ Contibutes
 ----------
 - Always welcomed ( Feature or Bugfix or Unitest )
 - Platform Independent
-- Simple is the most important thing. No heavy / fancy code. No 3rd library.
+- Simple is the most important thing. No heavy / fancy code. No 3rd library(Hope).
 - Keep less code
 
 Final
