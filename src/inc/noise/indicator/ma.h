@@ -1,0 +1,44 @@
+#pragma once
+
+#include "noise/def.h"
+#include "noise/log.h"
+#include "noise/indicator/indicator.h"
+
+namespace noise
+{
+
+class Strategy;
+
+namespace ta
+{
+/**
+ * Ma could be use With:
+ *  1. Strategy, auto register, process, plot on chart
+ *  2. indepant class, to calc mean average analize
+ */
+class Ma : public Indicator {
+
+public:
+    Ma(Strategy *stgy, std::string name, int period = 5, std::string ref = INDICATOR_CLOSE);
+    Ma(std::string name, PtrSeries& series, int period = 5);
+    ~Ma(void);
+
+    float get(int pos) override;
+    float get_by_index(int idx = 0);
+
+public:
+    void init(void) override;                           //called once for setup
+    void update_with_preload(void) override;            //called once       (when       support preload)
+    void next(const struct noise::bar &bar) override;   //called every bar  (when Don't support preload)
+
+public:
+    int          period_;
+    PtrSeries    series_;
+    PtrSeries    series_ref_;
+    std::string  ref_name_;
+};
+
+
+} // namespace ta
+} // namespace noise
+

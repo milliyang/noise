@@ -149,20 +149,20 @@ void QVolume::update_stat(const struct figure_stat &stat)
     //     start_idx_, cur_idx_, end_idx_, total_idx_len_);
 }
 
-void QVolume::setup_indicator(PtrIndicator indicator)
+void QVolume::setup_series(PtrSeries series)
 {
-    m_volume = indicator;
+    m_volume = series;
     init_figure();
 }
 
-void QVolume::setup_indicators(std::vector<PtrIndicator> &indicators)
+void QVolume::setup_seriess(std::vector<PtrSeries> &seriess)
 {
-    m_indicators = indicators;
+    seriess_ = seriess;
     
-    for (auto it = indicators.begin(); it != indicators.end(); it++) {
+    for (auto it = seriess.begin(); it != seriess.end(); it++) {
         const auto indi = *it;
         if (indi->name == INDICATOR_VOLUME) {
-            setup_indicator(indi);
+            setup_series(indi);
         } else if (indi->name == INDICATOR_OPEN) {
             m_open = indi;
         } else if (indi->name == INDICATOR_CLOSE) {

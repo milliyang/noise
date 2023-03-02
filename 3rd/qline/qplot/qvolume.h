@@ -14,8 +14,8 @@ public:
 
 public:
     void update_stat(const struct figure_stat &stat);
-    void setup_indicator(PtrIndicator indicator);
-    void setup_indicators(std::vector<PtrIndicator> &indicators);
+    void setup_series(PtrSeries series);
+    void setup_seriess(std::vector<PtrSeries> &seriess);
 
 private:
     void init_figure(void);
@@ -40,10 +40,10 @@ private:
     float m_bin_width;
     float m_y_scaler;
 
-    PtrIndicator m_volume;
-    PtrIndicator m_open;
-    PtrIndicator m_close;
-    std::vector<PtrIndicator> m_indicators;
+    PtrSeries m_volume;
+    PtrSeries m_open;
+    PtrSeries m_close;
+    std::vector<PtrSeries> seriess_;
     QString m_figure_name;
 };
 

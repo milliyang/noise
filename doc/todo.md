@@ -1,15 +1,27 @@
 
+TODO LIST (20230111)
+-------------------
+```
+- spdlog/fmt                                                        =>done
+- talib more series: ma,stddev,boll                                 =>done
+
+- yml or ini config
+- add pnl figure
+- show buy,sell check point ( special series: start,arrow,triangle,text)
+- update data when not support preload
+
+```
+
 
 TODO LIST (20220529)
 -------------------
 ```
-
-- time / duration / exposure days ( formating, calculation )        => done
-- sys log                                                           -> skip, later
+- time / duration / exposure days ( formating, calculation )        =>done
+- sys log                                                           =>done
 - openmp                                                            =>done
 - utalib                                                            =>done
 - 3rd talib                                                         -> skip, later
-- predefine indicator (_date, open, _high, _low, _close, _volume )  => done
+- predefine series (_date, open, _high, _low, _close, _volume )  =>done
 - gnuplot
 - subdir: .qline
 - qplot
@@ -26,31 +38,31 @@ TODO LIST (20220529)
     - show lagel; (show/hide)                                       =>done
         - draw
         - on_click ( hide/show )                                    ->skip
-
-    - add pnl figure
-
-    - show buy,sell check point ( special indicator: start,arrow,triangle,text)
+```
 
 
-- update data when not support preload
-
+Others:
+-------------------
 - 3rd:
     - talib  ?
     - opencv ?
 
 - search, calc drawdown ( max,avg on closed trades )
-- yml or ini config
 - unitest
 - strategy interface rewrite ( user, system isolation )
 - ploting tool (terminal, gnuplot, flutter ... )
     - blur type=(nanf, replicate, mirror), kernel=5, anchor=(left,middle,right)
-
 
 - pure terminal control console (tmux)
 
 - data feed (tushare,FTNN, ...)
 - real world trading broker (FTNN) ?
 - database for history data ?
+
+
+### Note:
+```
+
 
 ```
 

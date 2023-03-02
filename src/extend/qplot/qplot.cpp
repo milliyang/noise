@@ -8,11 +8,11 @@
 
 namespace noise {
 
-PtrIndicator find_indicator(const std::string &name, std::vector<PtrIndicator> &indicators)
+PtrSeries find_series(const std::string &name, std::vector<PtrSeries> &seriess)
 {
-    for (int i = 0; i < indicators.size(); i++) {
-        if (indicators.at(i)->name == name) {
-            return indicators.at(i);
+    for (int i = 0; i < seriess.size(); i++) {
+        if (seriess.at(i)->name == name) {
+            return seriess.at(i);
         }
     }
     return nullptr;
@@ -28,11 +28,11 @@ QPlot::~QPlot(void)
 
 }
 
-void QPlot::plot(std::string filename, std::vector<PtrIndicator> &indicators)
+void QPlot::plot(std::string filename, std::vector<PtrSeries> &seriess)
 {
-    auto dates = find_indicator(INDICATOR_DATE, indicators);
+    auto dates = find_series(INDICATOR_DATE, seriess);
     if (dates.get() == nullptr) {
-        return; // no date indicator
+        return; // no date series
     }
 
     int argc = 0;
@@ -43,7 +43,7 @@ void QPlot::plot(std::string filename, std::vector<PtrIndicator> &indicators)
     app.installTranslator(&translator);
 
     qplot::QPlotWindow window;
-    window.plot(indicators);
+    window.plot(seriess);
     window.show();
 
     app.exec();

@@ -15,6 +15,11 @@ Strategy::Strategy(void)
 Strategy::~Strategy(void)
 {
     TRACE_LINE
+
+    //release all Indicator
+    for(auto iter = indicators_.begin(); iter!=indicators_.end(); iter++) {
+        delete *iter;
+    }
 }
 
 void Strategy::next(const struct bar &bar)
@@ -25,17 +30,42 @@ void Strategy::next(const struct bar &bar)
 
 void Strategy::init(std::shared_ptr<Broker> broker)
 {
-    m_broker = broker;
+    broker_ = broker;
+}
+
+void Strategy::buy(int size, int type)
+{
+    struct noise::order order;
+    order.type = type;
+    order.size = std::abs(size);
+    send_order(order);
+}
+
+void Strategy::buy(float precent, int type)
+{
+    //TODO:
+}
+
+void Strategy::sell(int size, int type)
+{
+    struct noise::order order;
+    order.type = type;
+    order.size = std::abs(size) * -1;
+    send_order(order);
+}
+
+void Strategy::sell(float precent, int type)
+{
+    //TODO:
 }
 
 void Strategy::send_order(struct order& order)
 {
-    TRACE_LINE
     if (order.type == noise::ORDER_T_MARKET) {
         order.price = NAN;
     }
-    if (m_broker.get() != nullptr) {
-        m_broker->place_a_order(order);
+    if (broker_.get() != nullptr) {
+        broker_->place_a_order(order);
     }
 }
 
@@ -47,12 +77,13 @@ void Strategy::plot(void)
     return;
 }
 
-PtrIndicator Strategy::create_indicator(const std::string &name)
+void Strategy::register_indicator(PtrIndicator ptr)
 {
-    if (m_ctx.data.get() != nullptr) {
-        return m_ctx.data->create_indicator(name);
-    }
-    return nullptr;
+    assert(ptr->name().length() > 0);
+
+    ptr->setup(m_ctx.data);
+    m_ctx.data->push_indicator(ptr->name(), ptr);
+    indicators_.push_back(ptr);
 }
 
 StrategyABC::StrategyABC(void)
@@ -92,7 +123,6 @@ void StrategyABC::on_bar_start(void)
     TRACE_LINE;
     TRACE_NEWLINE;
 }
-
 
 void StrategyABC::on_bar_recv(const struct bar &bar)
 {

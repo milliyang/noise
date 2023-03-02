@@ -13,7 +13,7 @@ public:
     QPlot(void);
     ~QPlot(void);
 
-    void plot(std::string filename, std::vector<PtrIndicator> &indicators);
+    void plot(std::string filename, std::vector<PtrSeries> &seriess);
 
 };
 

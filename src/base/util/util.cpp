@@ -2,10 +2,9 @@
 #include "noise/strategy.h"
 #include "noise/broker.h"
 #include "noise/util.h"
-
+#include "noise/log.h"
 
 namespace noise {
-
 
 void util::parse_csv_bars_file(std::vector<struct bar> &bars, const std::string &filepath)
 {
@@ -17,7 +16,7 @@ void util::parse_csv_bars_file(std::vector<struct bar> &bars, const std::string 
     // 20180103,000001.SZ,13.0414,13.1649,12.538,12.6615,13.0129,-0.35139999999999993,-2.7004,2962498.38,4006220.766
 
     if (!input.is_open()) {
-        std::cerr << "Couldn't read file: " << filepath << "\n";
+        LOGE("open failed: {}", filepath);
         return;
     }
 
@@ -36,7 +35,7 @@ void util::parse_csv_bars_file(std::vector<struct bar> &bars, const std::string 
         }
         if (column == 0) {
             if (one_row.at(0) != "trade_date") {
-                std::cerr << "Couldn't parse line: " << line << "\n";
+                LOGE("parse failed: {}", line);
                 return;
             }
             column = (int) one_row.size();
@@ -44,7 +43,7 @@ void util::parse_csv_bars_file(std::vector<struct bar> &bars, const std::string 
             //printf("bars column:%d\n", (int)one_row.size());
         } else {
             if (column != one_row.size()) {
-                std::cerr << "ignore bar; volumn:" << one_row.size() << " " << line << "\n";
+                LOGW("invalid line: {}", line);
                 continue; //ignore
             }
 
@@ -74,10 +73,6 @@ void util::parse_csv_bars_file(std::vector<struct bar> &bars, const std::string 
             bars.push_back(bar);
         }
         cnt++;
-
-        // if (cnt >= 100) {
-        //     break;
-        // }
     }
 }
 

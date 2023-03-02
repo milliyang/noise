@@ -26,8 +26,8 @@ Requirements
 - Qt [Option]           for GUI ploting
 - GCC
 - CMAKE
-- No "extra" libs, except for those tiny one already included in directory: noise/src/3rd
-    - log
+- Tiny 3rd lib in: noise/src/3rd
+    - [spdlog](https://github.com/gabime/spdlog) & [fmt](https://github.com/fmtlib/fmt)
     - talib
 ```
 

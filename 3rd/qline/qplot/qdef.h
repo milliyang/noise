@@ -26,8 +26,10 @@
 
 #include <map>
 
+#ifndef LOGD
 #define LOGD  printf
 #define LOGW  printf
+#endif
 
 #define CHK_NULL_INDI(indi)             \
 {                                       \
@@ -60,8 +62,8 @@
 namespace qplot
 {
 
-using PtrIndicator  = noise::PtrIndicator;
-using GroupIndicator = std::map<std::string, std::vector<noise::PtrIndicator>>;
+using PtrSeries  = noise::PtrSeries;
+using GroupIndicator = std::map<std::string, std::vector<noise::PtrSeries>>;
 
 } // namespace qplot
 

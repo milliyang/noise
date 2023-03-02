@@ -34,11 +34,11 @@ void QPlotWindow::keyPressEvent(QKeyEvent *event)
     }
 }
 
-PtrIndicator find_indicator(const std::string &name, std::vector<noise::PtrIndicator> &indicators)
+PtrSeries find_series(const std::string &name, std::vector<noise::PtrSeries> &seriess)
 {
-    for (int i = 0; i < indicators.size(); i++) {
-        if (indicators.at(i)->name == name) {
-            return indicators.at(i);
+    for (int i = 0; i < seriess.size(); i++) {
+        if (seriess.at(i)->name == name) {
+            return seriess.at(i);
         }
     }
     return nullptr;
@@ -55,11 +55,11 @@ void QPlotWindow::q_on_stat_changed(struct figure_stat stat)
     }
 }
 
-void QPlotWindow::plot(std::vector<noise::PtrIndicator> &indicators)
+void QPlotWindow::plot(std::vector<noise::PtrSeries> &seriess)
 {
-    auto dates = find_indicator(INDICATOR_DATE, indicators);
+    auto dates = find_series(INDICATOR_DATE, seriess);
     if (dates.get() == nullptr) {
-        // no date indicator
+        // no date series
         QMessageBox::warning(this, tr("Warn"), tr("not data"), QMessageBox::Yes);
         return;
     }
@@ -69,17 +69,17 @@ void QPlotWindow::plot(std::vector<noise::PtrIndicator> &indicators)
     {
         auto figure = new QFigure(this);
         figure->setFocusPolicy(Qt::StrongFocus);
-        figure->setup_indicator(indicators, false);
+        figure->setup_series(seriess, false);
         QSplitter *sp = new QSplitter(Qt::Vertical, main_splitter);
         sp->addWidget(figure);
         m_figures.push_back(figure);
     }
 
-    auto volume = find_indicator(INDICATOR_VOLUME, indicators);
+    auto volume = find_series(INDICATOR_VOLUME, seriess);
     if (volume) {
         QSplitter *sp1 = new QSplitter(Qt::Vertical, main_splitter);
         auto figure = new QVolume(this);
-        figure->setup_indicators(indicators);
+        figure->setup_seriess(seriess);
         figure->setFocusPolicy(Qt::StrongFocus);
         sp1->addWidget(figure);
         figure->setMaximumHeight(150);
@@ -89,14 +89,14 @@ void QPlotWindow::plot(std::vector<noise::PtrIndicator> &indicators)
 
     //
     GroupIndicator groups;
-    for (int i = 0; i < indicators.size(); i++) {
-        const auto indi = indicators.at(i);
+    for (int i = 0; i < seriess.size(); i++) {
+        const auto indi = seriess.at(i);
         if (indi->figure == FIGURE_DEFAULT) {
             continue;
         }
         auto it = groups.find(indi->figure);
         if (it == groups.end()) {
-            std::vector<noise::PtrIndicator> v_indi;
+            std::vector<noise::PtrSeries> v_indi;
             v_indi.push_back(dates);
             v_indi.push_back(indi);
             groups[indi->figure] = v_indi;
@@ -108,7 +108,7 @@ void QPlotWindow::plot(std::vector<noise::PtrIndicator> &indicators)
         QSplitter *sp = new QSplitter(Qt::Vertical, main_splitter);
         auto figure = new QFigure(this);
         figure->setFocusPolicy(Qt::StrongFocus);
-        figure->setup_indicator(it->second);
+        figure->setup_series(it->second);
         sp->addWidget(figure);
         m_figures.push_back(figure);
     }
@@ -118,7 +118,7 @@ void QPlotWindow::plot(std::vector<noise::PtrIndicator> &indicators)
         QSplitter *sp = new QSplitter(Qt::Vertical, main_splitter);
         auto figure = new QFigure(this);
         figure->setFocusPolicy(Qt::StrongFocus);
-        figure->setup_indicator(indicators, false);
+        figure->setup_series(seriess, false);
         sp->addWidget(figure);
     }
 #endif

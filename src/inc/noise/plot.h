@@ -6,11 +6,11 @@
 
 namespace noise
 {
-struct indicator;
+struct series;
 class Broker;
 class Plot;
 
-using PtrIndicator = std::shared_ptr<struct indicator>;
+using PtrSeries = std::shared_ptr<struct series>;
 using PtrPlot = std::shared_ptr<Plot>;
 using FuncPlot = std::function<PtrPlot(void)>;
 
@@ -19,7 +19,7 @@ class Plot {
 public:
     Plot(void) {};
     ~Plot(void) {};
-    virtual void plot(std::string filename, std::vector<PtrIndicator> &indicators) = 0;
+    virtual void plot(std::string filename, std::vector<PtrSeries> &seriess) = 0;
 };
 
 

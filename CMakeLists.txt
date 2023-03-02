@@ -10,10 +10,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -fPIE")
 set(ROOT_DIR "${CMAKE_SOURCE_DIR}/src")
 
 include_directories("${ROOT_DIR}/inc")
+include_directories("${ROOT_DIR}/../3rd/spdlog/include")
+
+add_definitions(-DCONFIG_SPDLOG)
 
 file(GLOB SRC "${ROOT_DIR}/*.cpp"
 			  "${ROOT_DIR}/base/*.cpp"
 			  "${ROOT_DIR}/base/util/*.cpp"
+			  "${ROOT_DIR}/base/indicator/*.cpp"
 )
 
 if(LINUX)

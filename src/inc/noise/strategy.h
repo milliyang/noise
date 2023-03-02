@@ -1,6 +1,7 @@
 #pragma once
 
 #include "noise/noise.h"
+#include "noise/data.h"
 
 namespace noise
 {
@@ -38,28 +39,38 @@ public:
 
 public:
     //common user API:
+    void buy(int size, int type = noise::ORDER_T_MARKET);
+    void buy(float precent, int type = noise::ORDER_T_MARKET);
+    void sell(int size, int type = noise::ORDER_T_MARKET);
+    void sell(float precent, int type = noise::ORDER_T_MARKET);
+
     void send_order(struct order& one);         //broker.send_order(x)
     void close_position(void);                  //broker.close_position()
+
     void plot(void);
-    PtrIndicator create_indicator(const std::string &name);
 
     void setup_plot(FuncPlot func_plot);
 
-    //Framework Inner Use Only
-public:
+protected:
+    //Framework API:
     void next(const struct bar &bar);
     void init(std::shared_ptr<Broker> broker);
 
     void set_id(uint32_t id) { m_id = id; };
     void set_context(struct BtContext &ctx) { m_ctx = ctx; };
+    void register_indicator(PtrIndicator ptr);
 
 protected:
     void init();
 
     uint32_t m_id;
     uint32_t m_bar_idx;
-    std::shared_ptr<Broker> m_broker;
+    std::shared_ptr<Broker> broker_;
     struct BtContext m_ctx;
+    std::vector<PtrIndicator> indicators_;
+
+    friend class Backtest;
+    friend class ta::Indicator;
 };
 
 class StrategyABC : public Strategy {

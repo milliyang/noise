@@ -5,25 +5,23 @@ namespace noise {
 
 Broker::Broker(void)
 {
-    TRACE_LINE
 
     m_orders_active.clear();
     m_orders_closed.clear();
     m_trades_active.clear();
     m_trades_closed.clear();
 
-    m_config.commission = 0;
-    m_config.hedging = 0;
-    m_config.trade_on_close = 0;
+    config_.commission = 0;
+    config_.hedging = 0;
+    config_.trade_on_close = 0;
 
     m_first_bar.time = 0;
     m_cur_bar.time = 0;
-    //m_config.commission = 0.005f; //0.5%
+    //config_.commission = 0.005f; //0.5%
 }
 
 Broker::~Broker(void)
 {
-    TRACE_LINE
 }
 
 /**
@@ -32,8 +30,7 @@ Broker::~Broker(void)
  */
 void Broker::process(const struct bar &bar)
 {
-    TRACE_LINE
-    uprint::print("new bar", bar);
+    uprint::print("new   bar", bar);
 
     if (m_first_bar.time == 0) { m_first_bar = bar; };
 
@@ -43,9 +40,8 @@ void Broker::process(const struct bar &bar)
     //TODO:
     // - update posotion
     // - update stat, Enti, PNL
-    // - 
-
-    //m_position.update();
+    // -
+    m_position.update(bar.code, bar.close);
 }
 
 /**
@@ -54,7 +50,6 @@ void Broker::process(const struct bar &bar)
  */
 void Broker::process_order(void)
 {
-    TRACE_LINE
 
     //TODO:
     // support order executed on condition
@@ -66,17 +61,19 @@ void Broker::process_order(void)
         // force market order [now]
         if (order.type != ORDER_T_MARKET) { order.type = ORDER_T_MARKET; }
 
-        uprint::print("new order", order);
-
         //TODO: one broker handle: multiple code together
         if (0 && order.code != m_cur_bar.code) {
             struct bar code_bar;// xxx_get_bar(m_order.code);
             // 1. get barinfo of the code
             // 2.
+        } else {
+            order.code = m_cur_bar.code;
         }
 
+        uprint::print("new order", order);
+
         float cur_price;
-        if (m_config.trade_on_close) {
+        if (config_.trade_on_close) {
             cur_price = m_cur_bar.pre_close;
         } else {
             cur_price = m_cur_bar.open;
@@ -85,7 +82,7 @@ void Broker::process_order(void)
         int size = adjust_size_on_position(order.size);
         int need_size = size;
 
-        if (!m_config.hedging) {
+        if (!config_.hedging) {
             int preprocess = 1; //preprocess the order & trade with the same date
             do {
                 if (need_size == 0) { break; } //bugfix
@@ -120,7 +117,6 @@ void Broker::process_order(void)
                     }
                     if (need_size == 0) { break; }
                 }
-                
             } while (preprocess--);
 
             //remove closed trades
@@ -133,9 +129,9 @@ void Broker::process_order(void)
             }
         }
 
-        float adjusted_price = adjust_price_on_fee(size, cur_price);
         if (need_size != 0) {
-            open_a_trade(adjusted_price, size, order);
+            float adjusted_price = adjust_price_on_fee(need_size, cur_price);
+            open_a_trade(adjusted_price, need_size, order, cur_price);
             m_orders_closed.push_back(order);
         }
     }
@@ -146,14 +142,12 @@ void Broker::process_order(void)
 
 void Broker::init(const struct broker_config &cfg)
 {
-    m_config = cfg;
+    config_ = cfg;
+    m_position.set_cash(cfg.init_cash);
 }
 
-void Broker::close(void)
+void Broker::on_finish(void)
 {
-    TRACE_LINE
-    printf("[broker] close event\n");
-
     //ignore pendding order
     m_orders_active.clear();
 
@@ -162,7 +156,6 @@ void Broker::close(void)
 
 void Broker::close_position(void)
 {
-    TRACE_LINE
 
     for (auto it_trade = m_trades_active.begin(); it_trade != m_trades_active.end(); ++it_trade) {
         if (it_trade->is_closed()) { continue; }
@@ -176,7 +169,18 @@ void Broker::close_position(void)
     }
     m_trades_active.clear();
 
-    print_stat();
+    print_status();
+}
+
+bool Broker::is_in_position(void)
+{
+    for (auto it_trade = m_trades_active.begin(); it_trade != m_trades_active.end(); ++it_trade) {
+        if (it_trade->is_closed()) { continue; }
+
+        return true;
+    }
+
+    return false;
 }
 
 const std::vector<struct trade>& Broker::get_trades(void)
@@ -201,9 +205,9 @@ void Broker::get_first_and_last_bars(struct bar &first, struct bar &last)
 float Broker::adjust_price_on_fee(int size, float price)
 {
     if (size > 0) {
-        price += (price * m_config.commission);  // 0.3% * 19.0 
+        price += (price * config_.commission);  // 0.3% * 19.0 
     } else if (size < 0) {
-        price -= (price * m_config.commission);
+        price -= (price * config_.commission);
     }
     return price;
 }
@@ -215,7 +219,6 @@ int Broker::adjust_size_on_position(int size)
 
 void Broker::place_a_order(struct order& order)
 {
-    TRACE_LINE
 
     //check valid
     if (order.size == 0) return;
@@ -236,19 +239,21 @@ void Broker::place_a_order(struct order& order)
     m_orders_active.push_back(order);
 }
 
-void Broker::open_a_trade(float price, int size, const struct order& order)
+void Broker::open_a_trade(float price, int size, const struct order& order, float cur_price)
 {
-    TRACE_LINE
-
     struct trade trade;
     trade.code = order.code;
     trade.entry_price = price;
-    trade.size = order.size;
+    trade.size = size;
+
+    float money = price * std::abs(size);
+    m_position.withdraw(money);
+    m_position.update(order.code, size, cur_price);
 
     //fill in system info
     trade.entry_time = m_cur_bar.time;
     //init
-    trade.exit_time = 0;    //must
+    trade.exit_time = 0;        //must
     trade.exit_price = 0;       //must
     trade.PNL = 0;
 
@@ -258,7 +263,6 @@ void Broker::open_a_trade(float price, int size, const struct order& order)
 
 void Broker::close_a_trade(struct trade& trade, float price, time_t time)
 {
-    TRACE_LINE
     trade.set_closed(time);
 
     struct trade one_trade = trade;
@@ -266,13 +270,16 @@ void Broker::close_a_trade(struct trade& trade, float price, time_t time)
     one_trade.exit_price = price;
     one_trade.PNL = one_trade.size * (one_trade.exit_price - one_trade.entry_price);
 
+    float money = price * std::abs(one_trade.size);
+    m_position.deposit(money);
+    m_position.update(trade.code, (-1)*one_trade.size, price);
+
     uprint::print("close trade", one_trade);
     m_trades_closed.push_back(one_trade);
 }
 
 void Broker::reduce_a_trade(struct trade& trade, float price, int size, time_t time)
 {
-    TRACE_LINE
     assert(trade.size * size < 0);
 
     //eg. 100 (size=-30)  or  -100  (size=30)
@@ -286,13 +293,17 @@ void Broker::reduce_a_trade(struct trade& trade, float price, int size, time_t t
     trade.size += size;
 }
 
-void Broker::print_stat(void)
+float Broker::get_equity(void)
 {
-    TRACE_LINE
-    printf("[broker.stat] m_orders_active size:%d\n",      (int)m_orders_active.size());
-    printf("[broker.stat] m_trades_active size:%d\n",      (int)m_trades_active.size());
-    printf("[broker.stat] m_trades_closed size:%d\n",      (int)m_trades_closed.size());
-    printf("[broker.stat] m_orders_closed size:%d\n",      (int)m_orders_closed.size());
+    return m_position.equity();
+}
+
+void Broker::print_status(void)
+{
+    LOGI("[broker.stat] m_orders_active size:{}",      (int)m_orders_active.size());
+    LOGI("[broker.stat] m_trades_active size:{}",      (int)m_trades_active.size());
+    LOGI("[broker.stat] m_trades_closed size:{}",      (int)m_trades_closed.size());
+    LOGI("[broker.stat] m_orders_closed size:{}",      (int)m_orders_closed.size());
 
     uprint::print("[broker.stat] m_trades_active ", m_trades_active);
     uprint::print("[broker.stat] m_trades_closed ", m_trades_closed);

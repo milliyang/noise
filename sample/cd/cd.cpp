@@ -1,4 +1,5 @@
 #include "noise/noise.h"
+#include "noise/indicator/ta.h"
 #include "cd.h"
 
 #ifdef CONFIG_QPLOT
@@ -9,17 +10,14 @@
 
 StrategyCD::StrategyCD(void)
 {
-    TRACE_LINE
 }
 
 StrategyCD::~StrategyCD(void)
 {
-    TRACE_LINE
 }
 
 void StrategyCD::on_create(struct noise::bt_config &cfg)
 {
-    TRACE_LINE;
     /**
      * TODO:
      *   - init backtest framework
@@ -27,15 +25,16 @@ void StrategyCD::on_create(struct noise::bt_config &cfg)
      *   - init broker commission, style
      *   - register your ploting lib
      */
-    //cfg.mode = noise::BT_MODE_ISOLATION;
     cfg.mode = noise::BT_MODE_ONE2ONE;
-    cfg.codes = {"000004.SZ"};
+    // cfg.codes = {"000004.SZ"};
+    cfg.codes = {"300015.SZ"};
 #if 0
     for (int i = 0; i < 10; i++) {
         cfg.codes.push_back("000001.SZ");
     }
 #endif
 
+    cfg.broker.init_cash = 100000.0f;
     cfg.broker.commission = 0.002f;
     cfg.broker.hedging = false;
     cfg.broker.trade_on_close = true;
@@ -43,7 +42,12 @@ void StrategyCD::on_create(struct noise::bt_config &cfg)
     //cfg.feed.root_path = "/home/leo/tmpfs/root";
     cfg.feed.root_path = "/home/leo/work/root";
     cfg.feed.root_path = "D:/root";
-    //cfg.feed.filename  = "/home/leo/tmpfs/root/bars/000001.SZ.csv";
+    cfg.feed.root_path = "P:/tmpfs/root";
+    // cfg.feed.filename  = "/home/leo/tmpfs/root/bars/000001.SZ.csv";
+    //cfg.feed.filename = "Z:\\work\\quant\\noise.cpp\\data\\300015.SZ.csv";
+    // cfg.feed.filename  = "../data/300015.SZ.csv";
+    cfg.feed.begin_date = "20220610";
+    //cfg.feed.begin_date = "20250310";
 
     cfg.plot.show_on_finish = 1;
 
@@ -56,78 +60,30 @@ void StrategyCD::on_create(struct noise::bt_config &cfg)
 
 void StrategyCD::on_destroy(void)
 {
-    TRACE_LINE;
 }
 
 void StrategyCD::on_start(void)
 {
-    TRACE_LINE;
-    /**
-     * TODO:
-     *   - init indicator before the first bar in
-     *   - do preload stock code
-     */
-
-    m_cnt = 0;
-    m_preloaded_once = false;
-
-    printf("on_start id:%d\n", m_id);
+    index_ = -1;
+    //ma5_        = new noise::ta::Ma(this, "ma5", 5);
+    ma10_       = new noise::ta::Ma(this,       "ma10", 10);
+    ma60_       = new noise::ta::Ma(this,       "ma60", 60);
+    stddev10_   = new noise::ta::Stddev(this,   "stddev10", 10);
+    boll_       = new noise::ta::Boll(this,     "BOLL");
+    LOGI("on_start id:{}", m_id);
 }
 
 void StrategyCD::on_bar_start(void)
 {
-    TRACE_LINE;
-    /**
-     * TODO:
-     *   - init indicator before the first bar in
-     *   - do preload stock code
-     */
-
-    //Your indicator:
-    m_ma5       = create_indicator("ma5");
-    m_ma10      = create_indicator("ma10");
-    m_stddev5   = create_indicator("stddev5");
-    m_boll_high = create_indicator("boll_high");
-    m_boll_mid  = create_indicator("boll_mid ");
-    m_boll_low  = create_indicator("boll_low ");
-
-    //Plot on another figure
-    m_stddev5->figure = "stddev";
-
-    //Get default indicator
-    m_close = m_ctx.data->find_indicator(INDICATOR_CLOSE);
-
-    //Handle Bar at batch when preload supported
-    if (m_ctx.data->is_support_preload()) {
-        update_indicator();
-        m_preloaded_once = true;
-    }
-}
-
-void StrategyCD::update_indicator(void)
-{
-    /* preload data only need to update indicator once */
-    if (m_preloaded_once) { return; }
-
-    noise::utalib::ma(m_ma5->data,  m_close->data, 5);
-    noise::utalib::ma(m_ma10->data, m_close->data, 10);
-    noise::utalib::stddev(m_stddev5->data, m_close->data, 10);
-    noise::utalib::boll(m_boll_high->data, m_boll_mid->data, m_boll_low->data, m_close->data, 5, 2.0f);
-
-#if 1
-    //test copy indicator
-    auto xx  = create_indicator("boll_low2");
-    xx->figure = "stddev2";
-    xx->data = m_boll_low->data;
-#endif
+    series_close_ = m_ctx.data->find_series(INDICATOR_CLOSE);
 }
 
 void StrategyCD::prepare_data(const struct noise::bar &bar)
 {
-    if (m_cnt == 0) {
-        m_code = bar.code;
+    index_++;
+    if (index_ == 0) {
+        code_ = bar.code;
     }
-    update_indicator();
 }
 
 void StrategyCD::on_bar_recv(const struct noise::bar &bar)
@@ -135,37 +91,55 @@ void StrategyCD::on_bar_recv(const struct noise::bar &bar)
     TRACE_TAG(bar.code.c_str());
     prepare_data(bar);
 
-    {
-        struct noise::order order;
-        order.type = noise::ORDER_T_MARKET;
-        order.size = 100;
-        send_order(order);
+    if (broker_->is_in_position()) {
+        in_pos_cnt_++;
+        if (in_pos_cnt_ >= 5) {
+            sell(1000);
+        }
+        return;
     }
 
-    {
-        struct noise::order order;
-        order.type = noise::ORDER_T_MARKET;
-        order.size = -10;
-        send_order(order);
+#if 1
+    if (!boll_->is_ready() || isnan(boll_->series_low_->get(index_))) {
+        return;
+    }
+    time_t tt = series_close_->get_time(index_);
+
+    if (noise::ta::crossover(series_close_, boll_->series_low_, index_, false)) {
+        LOGI("date:{} boll buy close:{:.2f} boll_low:{:.2f}", noise::utime::fmt_time(tt), series_close_->get(index_), boll_->series_low_->get(index_));
+        buy(1000);
+        in_pos_cnt_ = 0;
     }
 
-    m_cnt++;
-    TRACE_NEWLINE;
+#endif
+
+#if 0
+    if (!ma10_->is_ready()) {
+        return;
+    }
+    if (noise::ta::crossover(ma5_, ma10_, true)) {
+        time_t tt = series_close_->get_time(index_);
+        LOGI("date:{} gold ma10:{:.2f} ma5:{:.2f}", noise::utime::fmt_time(tt), ma10_->get(0), ma5_->get(0));
+    } else if (noise::ta::crossover(ma5_, ma10_, false)) {
+        time_t tt = series_close_->get_time(index_);
+        LOGI("date:{} dead ma10:{:.2f} ma5:{:.2f}", noise::utime::fmt_time(tt), ma10_->get(0), ma5_->get(0));
+    }
+#endif
+
 }
 
 void StrategyCD::on_bar_stop(void)
 {
-    TRACE_LINE;
+
 }
 
 void StrategyCD::on_finish(void)
 {
-    TRACE_LINE;
+    stddev10_->series_->figure = "figure2";
 
     // noise::uprint::print("m_close",         m_close);
     // noise::uprint::print("m_close_ma5",     m_ma5->data);
     // noise::uprint::print("m_close_ma10",    m_ma10->data);
-    // noise::uprint::print("m_close_stddev5", m_stddev5->data);
 
     // test_plot0();
     plot();

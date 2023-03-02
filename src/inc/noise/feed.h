@@ -9,8 +9,9 @@ struct bar;
 
 struct feed_config {
     std::string code;
-    std::string root_path;   //path to backtest root dir 
+    std::string root_path;      //path to backtest root dir 
     std::string filename;
+    std::string begin_date;     //start bt from begin_date
 };
 
 class Feed {
@@ -24,7 +25,7 @@ public:
     virtual bool is_support_preload(void) = 0;
     virtual std::vector<struct bar>& get_bars(void) = 0;
 
-    struct feed_config m_config;
+    struct feed_config config_;
 };
 
 

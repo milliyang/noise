@@ -25,7 +25,7 @@ public:
     void virtual keyPressEvent(QKeyEvent* event);
 
 public:
-    void plot(std::vector<noise::PtrIndicator> &indicators);
+    void plot(std::vector<noise::PtrSeries> &seriess);
 
 public slots:
     void q_on_stat_changed(struct figure_stat stat);

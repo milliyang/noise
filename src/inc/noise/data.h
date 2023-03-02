@@ -1,16 +1,23 @@
 #pragma once
 
 #include "noise/def.h"
+#include "noise/log.h"
+#include "noise/indicator/indicator.h"
 
 #include<vector>
 #include<map>
 
 namespace noise
 {
-struct indicator;
+struct series;
 class Broker;
 class Feed;
-using PtrIndicator = std::shared_ptr<struct indicator>;
+class Stat;
+
+using PtrSeries = std::shared_ptr<struct series>;
+using MapSeries = std::map<std::string, PtrSeries>;
+
+using PtrIndicator = ta::Indicator*;
 using MapIndicator = std::map<std::string, PtrIndicator>;
 
 struct plot_config {
@@ -25,29 +32,38 @@ public:
     Data(void);
     ~Data(void);
 
-    void init(std::shared_ptr<Broker> broker, std::shared_ptr<Feed> feed, const struct plot_config &cofnig);
+    PtrSeries create_series(const std::string &name);
+    PtrSeries find_series(const std::string &name);
 
-    PtrIndicator create_indicator(const std::string &name);
+    void push_indicator(const std::string &name, PtrIndicator indicator);
     PtrIndicator find_indicator(const std::string &name);
-    bool is_support_preload(void);
 
-    void setup_plot(FuncPlot func_plot) { m_func_plot = func_plot; };
+    bool is_support_preload(void);
     void plot(void);
 
 protected:
-    void update_default_indicator(struct bar &bars);
+    //framework used only:
+    void setup(std::shared_ptr<Broker> broker, std::shared_ptr<Feed> feed, const struct plot_config &cofnig);
+    void setup_plot(FuncPlot func_plot) { m_func_plot = func_plot; };
+    void process_preload(void);
+    void update_data_series(struct bar &bars);
 
 private:
-    void init_default_indicators(std::vector<struct bar> &bars);
+    void process_preload(std::vector<struct bar> &bars);
 
 private:
-    std::shared_ptr<Broker> m_broker;
-    std::shared_ptr<Feed> m_feed;
-    struct plot_config m_config;
-    MapIndicator m_indicators;
-    FuncPlot m_func_plot;
+    std::shared_ptr<Broker> broker_;
+    std::shared_ptr<Feed>   feed_;
+    struct plot_config      config_;
+    MapSeries               series_map_;
+    MapIndicator            indicator_map_;
+    FuncPlot                m_func_plot;
+    std::shared_ptr<struct timeseries> time_series_;
+    int                     time_index_;                //increased 1 on bar
+    bool                    data_processed_;
 
-    std::shared_ptr<struct timeseries> m_times;
+    friend class Backtest;
+    friend class Stat;
 };
 
 

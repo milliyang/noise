@@ -39,7 +39,7 @@ void Backtest::make_strategy(uint32_t id)
     ctx.feed   = std::make_shared<FeedCSV>();
     //ctx.plot   = std::make_shared<Plot>();
     ctx.data   = std::make_shared<Data>();
-    ctx.stat->init(ctx.broker);
+    ctx.stat->init(ctx.broker, ctx.data);
 
     ctx.strategy = m_func_get_stragegy();
     ctx.strategy->set_id(id);
@@ -47,18 +47,18 @@ void Backtest::make_strategy(uint32_t id)
     ctx.strategy->set_context(ctx);
 
     if (id == 0) {
-        ctx.strategy->on_create(m_config);
+        ctx.strategy->on_create(config_);
     }
-    ctx.broker->init(m_config.broker);
+    ctx.broker->init(config_.broker);
 
     //todo:
-    struct feed_config cfg = m_config.feed;
-    cfg.code = m_config.codes.at(id);
+    struct feed_config cfg = config_.feed;
+    cfg.code = config_.codes.at(id);
     ctx.feed->init(cfg);
 
     //after feed init
-    ctx.data->init(ctx.broker, ctx.feed, m_config.plot);
-    ctx.data->setup_plot(m_config.func.plot);
+    ctx.data->setup(ctx.broker, ctx.feed, config_.plot);
+    ctx.data->setup_plot(config_.func.plot);
 
     m_v_context.push_back(ctx);
     if (id == 0) { m_context = ctx; }
@@ -69,44 +69,41 @@ void Backtest::make_strategy(uint32_t id)
 void Backtest::run_strategy(const struct BtContext &ctx)
 {
     struct bar bar;
-    bool update_data = ctx.feed->is_support_preload() ? false : true;
 
     ctx.strategy->on_start();
+    ctx.data->process_preload();
 
     ctx.strategy->on_bar_start();
     while(ctx.feed->next(bar)) {
-
-        if (update_data) {
-            //TODO:
-            //ctx.data->update_default_indicator(bar);
-        }
+        ctx.data->update_data_series(bar);
         ctx.broker->process(bar);
         ctx.strategy->next(bar);
         ctx.strategy->on_bar_recv(bar);
+        ctx.stat->on_trade_day();
     }
     ctx.strategy->on_bar_stop();
-    ctx.broker->close();
-    ctx.stat->process();
-
+    ctx.broker->on_finish();
+    ctx.stat->on_finish();
     ctx.stat->plot();
+    LOGW("finish");
     ctx.strategy->on_finish();
 }
 
 void Backtest::init(void)
 {
-    m_config.mode = BT_MODE_ONE2ONE;
+    config_.mode = BT_MODE_ONE2ONE;
 
     make_strategy(0);
     assert(m_v_context.size() == 1);
 
 
     int strategy_context_num;
-    if (m_config.mode == BT_MODE_ONE2ONE) {
+    if (config_.mode == BT_MODE_ONE2ONE) {
         strategy_context_num = 1;
     } else {
-        strategy_context_num = (int) m_config.codes.size();
+        strategy_context_num = (int) config_.codes.size();
     }
-    uprint::print("subscribe code", m_config.codes);
+    uprint::print("subscribe code", config_.codes);
 
     for (int i = 1; i < strategy_context_num; i++) {
         make_strategy(i);
@@ -131,7 +128,7 @@ void Backtest::run()
      *
      * 0. load config
      * 1. load bars from feed
-     * 2. calc indicator (MACD,STDDEV)
+     * 2. calc series (MACD,STDDEV)
      * 3. for bars:
      *      next()
      * 4. calc stat, PNL
@@ -140,7 +137,7 @@ void Backtest::run()
 
     init();
 
-    if (m_config.mode == BT_MODE_ONE2ONE) {
+    if (config_.mode == BT_MODE_ONE2ONE) {
         run_strategy(m_context);
     } else {
 #ifdef __SUPPORT_OPENMP_TASK__

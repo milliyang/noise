@@ -1,6 +1,7 @@
 #pragma once
 
 #include "noise/def.h"
+#include <cassert>
 
 namespace noise {
 
@@ -12,12 +13,11 @@ class Strategy;
 class Data;
 class Plot;
 
-struct indicator;
+struct series;
 
 using PtrStrategy = std::shared_ptr<Strategy>;
 
-struct indicator;
-using PtrIndicator  = std::shared_ptr<struct indicator>;
+using PtrSeries  = std::shared_ptr<struct series>;
 using PtrPlot       = std::shared_ptr<Plot>;
 
 using FuncPlot      = std::function<PtrPlot(void)>;
@@ -44,6 +44,7 @@ struct BtContext {
 #include "noise/strategy.h"
 #include "noise/data.h"
 #include "noise/plot.h"
+#include "noise/indicator/indicator.h"
 
 //at last
 #include "noise/backtest.h"

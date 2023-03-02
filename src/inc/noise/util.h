@@ -50,7 +50,7 @@ namespace utalib {
     void ma(std::vector<float> &ma_values,          const std::vector<float> &values, int period);
     void ma2(std::vector<float> &ma_values,         const std::vector<float> &values, int period);
     void max(std::vector<float> &max_values,        const std::vector<float> &values, int period);
-    void stddev(std::vector<float> &stddev_values,  const std::vector<float> &values, int period); /*stddev.p*/
+    void stddev(std::vector<float> &stddev_values,  const std::vector<float> &values, int period, bool divided_by_mean = false); /*stddev.p*/
 
     void boll(std::vector<float> &high, std::vector<float> &mid, std::vector<float> &low,
                 const std::vector<float> &values, int period,
@@ -68,7 +68,7 @@ public:
         printf("[%s] time elapsed: %f ms\n", a_tag.c_str(), nano.count() / (1000.0f * 1000.0f));
     };
     //std::chrono::time_point<std::chrono::system_clock> start;
-    std::chrono::time_point<std::chrono::steady_clock> start;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start;
     std::string a_tag;
 };
 

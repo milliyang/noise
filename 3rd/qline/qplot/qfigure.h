@@ -5,7 +5,7 @@
 namespace qplot
 {
 
-struct user_indicator_st {
+struct user_series_st {
     int         idx;
     std::string short_name;
     QRect       rect;
@@ -27,8 +27,8 @@ public:
     void virtual resizeEvent(QResizeEvent* event);
     ~QFigure();
 
-    void setup_indicator(std::vector<PtrIndicator> &indicators, bool custom=true);
-    void add_indicator(noise::indicator &indicator);
+    void setup_series(std::vector<PtrSeries> &seriess, bool custom=true);
+    void add_series(noise::series &series);
     void update_stat(const struct figure_stat &stat);
 
 protected:
@@ -37,7 +37,7 @@ protected:
     //figure drawing
 private:
     void init_figure(void);
-    void init_user_indicators(void);
+    void init_user_seriess(void);
 
     void update_figure(void);
     void draw_figure(void);
@@ -48,14 +48,14 @@ private:
     void draw_mouse_cross_line(void);
     void draw_right_tips(void);
     //    
-    void draw_user_indicator_by_idx(int idx);
-    void draw_user_indicator_name(void);
+    void draw_user_series_by_idx(int idx);
+    void draw_user_series_name(void);
 
     void update_index(float factor = 1.0f);
 
     //utils
 private:
-    bool is_system_indicator(const std::string &name);
+    bool is_system_series(const std::string &name);
     bool is_mouse_inside_figure(void);
     QColor get_color(int idx);
     QColor get_color(const std::string &color_name);
@@ -87,22 +87,23 @@ private:
 
     bool m_is_mouse_left_btn_hold;
 
-    std::vector<PtrIndicator> m_indicators;
-    PtrIndicator m_indi_open;
-    PtrIndicator m_indi_high;
-    PtrIndicator m_indi_low;
-    PtrIndicator m_indi_close;
-    PtrIndicator m_indi_date;
-    PtrIndicator m_indi_chg;
-    PtrIndicator m_indi_volume;
-    PtrIndicator m_indi_key;
+    std::vector<PtrSeries> seriess_;
+    PtrSeries m_indi_open;
+    PtrSeries m_indi_high;
+    PtrSeries m_indi_low;
+    PtrSeries m_indi_close;
+    PtrSeries m_indi_date;
+    PtrSeries m_indi_chg;
+    PtrSeries m_indi_volume;
+    PtrSeries m_indi_key;
 
     bool m_default_figure;
     QString m_figure_name;
 
+    bool series_empty_warnning_;
 
-    std::vector<PtrIndicator> m_user_indi;
-    std::vector<struct user_indicator_st> m_user_indi_st;
+    std::vector<PtrSeries> m_user_indi;
+    std::vector<struct user_series_st> m_user_indi_st;
 };
 
 

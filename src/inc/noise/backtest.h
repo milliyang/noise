@@ -51,7 +51,7 @@ private:
     //others
 private:
     const std::string m_build_date;
-    struct bt_config m_config;
+    struct bt_config config_;
 };
 
 

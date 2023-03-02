@@ -1,4 +1,5 @@
 #include "noise/def.h"
+#include "noise/noise.h"
 #include "noise/stat.h"
 #include "noise/util.h"
 #include "noise/broker.h"
@@ -7,7 +8,7 @@ namespace noise {
 
 Stat::Stat(void)
 {
-    TRACE_LINE
+    equity_series_ = nullptr;
 }
 
 Stat::~Stat(void)
@@ -55,18 +56,93 @@ void Stat::plot(void)
     uprint::print("Stat", m_stat);
 }
 
-void Stat::process(void)
+void Stat::on_trade_day(void)
+{
+    if (equity_series_ == nullptr) {
+        equity_series_ = data_->create_series(INDICATOR_EQUITY);
+        equity_series_->figure = "Equity";
+        equity_series_->name = "cash";
+    }
+
+    // cash + stock
+    equity_series_->data.push_back(broker_->get_equity());
+}
+
+void Stat::on_finish(void)
+{
+    calc_stat();
+    generate_trade_series();
+    generate_equity_series();
+}
+
+void Stat::generate_trade_series(void)
+{
+    auto a_series = data_->create_series(INDICATOR_TRADE);
+    auto ptrades = std::make_shared<struct tradeseries>();
+
+    a_series->extra.ptrades = ptrades;
+    a_series->figure = "Profit & Loss";
+    a_series->name = "PNL";
+    a_series->sign = "triangle";
+
+    const auto closed_trades = broker_->get_trades();
+    if (closed_trades.size() <= 0) {
+        return;
+    }
+
+    for (auto iter = closed_trades.begin(); iter != closed_trades.end(); iter++) {
+        ptrades->trades.push_back(*iter);
+    }
+
+    //
+    const auto ptime = a_series->extra.ptime;
+    //init zero
+    a_series->data.resize(ptime->time.size());
+
+#if 1
+    //override pnl by date
+    int index = 0;
+    for (auto trade_iter = closed_trades.begin(); trade_iter != closed_trades.end(); trade_iter++) {
+        time_t time = trade_iter->exit_time;
+        float pnl = trade_iter->profit()*100;
+
+        for (; index < ptime->time.size();) {
+            if (ptime->time[index] == time) {
+                LOGI("match time:{} {} pnl:{:6.2f}%", ptime->time[index], time, pnl);
+                a_series->data[index] = pnl; //trade_iter->PNL;
+                break;
+            }
+            index++;
+        }
+        ptrades->trades.push_back(*trade_iter);
+    }
+    //debug
+    // int i = 0;
+    // for (auto iter = a_series->data.begin(); iter != a_series->data.end(); iter++) {
+    //     int date = utime::get_date(a_series->extra.ptime->time.at(i));
+    //     LOGD("pnl chart pnl:{} date:{}", *iter, date);
+    //     i++;
+    // }
+#endif
+}
+
+void Stat::generate_equity_series(void)
+{
+
+}
+
+void Stat::calc_stat(void)
 {
     TRACE_LINE
 
-    const auto trades = m_broker->get_trades();
+    const auto trades = broker_->get_trades();
     if (trades.size() <= 0) { return; }
 
     struct bar first_bar, last_bar;
-    m_broker->get_first_and_last_bars(first_bar,last_bar);
+    broker_->get_first_and_last_bars(first_bar,last_bar);
 
-    float enquity_base = 10000;
-    float enquity_cur  = enquity_base;
+    float equity_base = 10000;
+    float equity_cur  = equity_base;
     int win_cnt = 0;
 
     float best_trade_on_pnl,   worst_trade_on_pnl;
@@ -101,10 +177,10 @@ void Stat::process(void)
         //     m_stat.end_time = trade.exit_time;
         // }
         m_stat.PNL += trade.PNL;
-        enquity_cur += trade.PNL;
+        equity_cur += trade.PNL;
 
-        if (m_stat.equity_peak < enquity_cur) {
-            m_stat.equity_peak = enquity_cur;
+        if (m_stat.equity_peak < equity_cur) {
+            m_stat.equity_peak = equity_cur;
         }
         if (trade.PNL > 0) {
             win_cnt++;
@@ -150,8 +226,8 @@ void Stat::process(void)
 
     //
     m_stat.trade_cnt = (int) trades.size();
-    m_stat.equity_final = enquity_base+m_stat.PNL;
-    m_stat.return_final = m_stat.PNL / enquity_base;
+    m_stat.equity_final = equity_base+m_stat.PNL;
+    m_stat.return_final = m_stat.PNL / equity_base;
     m_stat.return_buy_and_hold = (last_bar.close - first_bar.open) / first_bar.open;
     m_stat.win_ratio = (float) win_cnt / (float)trades.size();
     m_stat.best_trade_on_PNL = best_trade_on_pnl;
@@ -172,13 +248,13 @@ void Stat::process(void)
     //s.loc['SQN'] = np.sqrt(n_trades) * pl.mean() / (pl.std() or np.nan)
 
 
-    //update PNL indicator
-
+    //update PNL series
 }
 
-void Stat::init(std::shared_ptr<Broker> broker)
+void Stat::init(std::shared_ptr<Broker> broker, std::shared_ptr<Data> data)
 {
-    m_broker = broker;
+    broker_ = broker;
+    data_ = data;
     memset(&m_stat, 0, sizeof(m_stat));
 }
 

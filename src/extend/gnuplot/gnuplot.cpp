@@ -4,11 +4,11 @@
 
 namespace noise {
 
-PtrIndicator find_indicator(const std::string &name, std::vector<PtrIndicator> &indicators)
+PtrSeries find_series(const std::string &name, std::vector<PtrSeries> &seriess)
 {
-    for (int i = 0; i < indicators.size(); i++) {
-        if (indicators.at(i)->name == name) {
-            return indicators.at(i);
+    for (int i = 0; i < seriess.size(); i++) {
+        if (seriess.at(i)->name == name) {
+            return seriess.at(i);
         }
     }
     return nullptr;
@@ -24,16 +24,16 @@ GnuPlot::~GnuPlot(void)
 
 }
 
-void GnuPlot::plot(std::string filename, std::vector<PtrIndicator> &indicators)
+void GnuPlot::plot(std::string filename, std::vector<PtrSeries> &seriess)
 {
-    auto dates = find_indicator(INDICATOR_DATE, indicators);
+    auto dates = find_series(INDICATOR_DATE, seriess);
     if (dates.get() == nullptr) {
         //TODO:
-        // no date indicator
+        // no date series
         return;
     }
 
-    auto stddev5 = find_indicator("stddev5", indicators);
+    auto stddev5 = find_series("stddev5", seriess);
 
     std::vector<double> x;
     std::vector<std::string> s_date;
@@ -53,10 +53,10 @@ void GnuPlot::plot(std::string filename, std::vector<PtrIndicator> &indicators)
     matplot::hold(true);
 
     std::vector<std::string> legends;
-    for (int i = 0; i < indicators.size(); i++) {
-        auto indi = indicators.at(i);
+    for (int i = 0; i < seriess.size(); i++) {
+        auto indi = seriess.at(i);
 
-        //ignore default indicator 
+        //ignore default series 
         if (indi->name.length() > 0 && indi->name.at(0) == '_') {
             continue;
         }

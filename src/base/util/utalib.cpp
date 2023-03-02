@@ -7,6 +7,10 @@ namespace noise {
 void utalib::ma2(std::vector<float> &ma_values, const std::vector<float> &values, int period)
 {
     assert(period > 0);
+    if (values.size() == 0) {
+        return;
+    }
+
     int idx_ma = (int)ma_values.size();  //resume from this idx
     for (; idx_ma < (int)values.size(); idx_ma++) {
         float sum = 0;
@@ -26,7 +30,11 @@ void utalib::ma2(std::vector<float> &ma_values, const std::vector<float> &values
 void utalib::ma(std::vector<float> &ma_values, const std::vector<float> &values, int period)
 {
     assert(period > 0);
+    if (values.size() == 0) {
+        return;
+    }
     assert(ma_values.size() == 0);
+
     const int MOD = period + 1;
     std::vector<float> fifo;
     fifo.reserve(MOD);
@@ -52,6 +60,9 @@ void utalib::ma(std::vector<float> &ma_values, const std::vector<float> &values,
 void utalib::max(std::vector<float> &max_values, const std::vector<float> &values, int period)
 {
     assert(period > 0);
+    if (values.size() == 0) {
+        return;
+    }
 
     int idx_resume = (int)max_values.size();  //resume from this idx
     for (; idx_resume < (int)values.size(); idx_resume++) {
@@ -70,9 +81,12 @@ void utalib::max(std::vector<float> &max_values, const std::vector<float> &value
 }
 
 /* A = sum( (v - mean)^2 ) / n;  result=sqrt(A) */
-void utalib::stddev(std::vector<float> &stddev_values, const std::vector<float> &values, int period)
+void utalib::stddev(std::vector<float> &stddev_values, const std::vector<float> &values, int period, bool divided_by_mean)
 {
     assert(period > 0);
+    if (values.size() == 0) {
+        return;
+    }
 
     std::vector<float> means;
     utalib::ma(means, values, period);
@@ -89,14 +103,30 @@ void utalib::stddev(std::vector<float> &stddev_values, const std::vector<float> 
             }
         }
         sum = std::sqrt(sum / period);
-        stddev_values.push_back(sum);
+
+        if (divided_by_mean) {
+            stddev_values.push_back(sum/means.at(idx_resume));
+        } else {
+            stddev_values.push_back(sum);
+        }
     }
 }
 
+/**
+ * BOLL (By JOHN BOLLINGER)
+ * method:
+ *  MID=MA(CLOSE,PERIOD)
+ *  UPPER=MID + TIMES*STD(CLOSE,PERIOD)
+ *  LOWER=MID - TIMES*STD(CLOSE,PERIOD)
+ */
 void utalib::boll(std::vector<float> &high, std::vector<float> &mid, std::vector<float> &low,
                 const std::vector<float> &values, int period,
                 float ratio)
 {
+    if (values.size() == 0) {
+        return;
+    }
+
     assert(high.size() == mid.size());
     assert(low.size() == mid.size());
     if (ratio <= 0) {ratio = 1.0f;}

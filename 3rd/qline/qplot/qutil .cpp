@@ -17,7 +17,7 @@ const static QMap<std::string, QColor> c_color_map = {
     {"qgeeen",  QGREEN},
 };
 
-bool QUtil::is_system_indicator(const std::string &name)
+bool QUtil::is_system_series(const std::string &name)
 {
     if (name.length() >0 && name.substr(0,1) == "_") {
         return true;

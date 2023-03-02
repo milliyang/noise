@@ -11,7 +11,7 @@ namespace qplot
 class QUtil {
 
 public:
-    static bool is_system_indicator(const std::string &name);
+    static bool is_system_series(const std::string &name);
 
     static bool get_color(QColor &color, const std::string &color_name);
 

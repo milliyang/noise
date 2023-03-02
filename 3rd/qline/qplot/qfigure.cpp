@@ -4,6 +4,8 @@
 #define ARRAY_SIZE(x)           (sizeof(x) / sizeof(x[0]))
 #define MIN_BAR                 (10)
 
+#define Y_MIN                   (10000000)
+
 namespace qplot
 {
 
@@ -15,6 +17,7 @@ QFigure::QFigure(QWidget *parent) : AutoGrid(parent)
     m_is_key_down = false;
     m_show_cross = true;
     m_is_mouse_left_btn_hold = false;
+    series_empty_warnning_ = false;
 }
 
 QFigure::~QFigure()
@@ -23,7 +26,7 @@ QFigure::~QFigure()
 
 void QFigure::init_figure(void)
 {
-    m_y_min = 1000;
+    m_y_min = Y_MIN;
     m_y_max = 0;
 
     CHK_NULL_INDI(m_indi_date);
@@ -53,7 +56,7 @@ void QFigure::update_figure(void)
         start_idx_ = 0;
     }
 
-    m_y_min = 1000;
+    m_y_min = Y_MIN;
     m_y_max = 0;
 
     if (m_default_figure) {
@@ -70,7 +73,7 @@ void QFigure::update_figure(void)
         }
     } else {
         // slow
-        for (auto it = m_indicators.begin(); it != m_indicators.end(); it++) {
+        for (auto it = seriess_.begin(); it != seriess_.end(); it++) {
             const auto &indi = *it;
             if (indi->name == INDICATOR_DATE) {
                 continue;
@@ -78,7 +81,10 @@ void QFigure::update_figure(void)
 
             for (int i= start_idx_; i < end_idx_; ++i) {
                 if (i >= indi->data.size()) {
-                    LOGW("indicator:%s is EMPTY !!!\n", indi->name.c_str());
+                    if (!series_empty_warnning_) {
+                        LOGW("series:%s is EMPTY !!!\n", indi->name.c_str());
+                        series_empty_warnning_ = true;
+                    }
                     break;  //bugfix empty
                 }
                 if (indi->data[i] > m_y_max ) {
@@ -121,18 +127,18 @@ void QFigure::draw_figure(void)
     for (int i = 0; i < m_user_indi_st.size(); i++) {
         auto st = m_user_indi_st[i];
         if (st.shown) {
-            draw_user_indicator_by_idx(i);
+            draw_user_series_by_idx(i);
         }
     }
-    draw_user_indicator_name();
+    draw_user_series_name();
 }
 
-void QFigure::init_user_indicators(void)
+void QFigure::init_user_seriess(void)
 {
     if (m_default_figure) {
-        for (int i = 0; i < m_indicators.size(); i++) {
-            auto indi = m_indicators.at(i);
-            if (QUtil::is_system_indicator(indi->name)) {
+        for (int i = 0; i < seriess_.size(); i++) {
+            auto indi = seriess_.at(i);
+            if (QUtil::is_system_series(indi->name)) {
                 continue;
             }
             if (indi->figure != FIGURE_DEFAULT) {
@@ -141,8 +147,8 @@ void QFigure::init_user_indicators(void)
             m_user_indi.push_back(indi);
         }
     } else {
-        for (int i = 0; i < m_indicators.size(); i++) {
-            auto indi = m_indicators.at(i);
+        for (int i = 0; i < seriess_.size(); i++) {
+            auto indi = seriess_.at(i);
             if (indi->name == INDICATOR_DATE) {
                 continue;
             }
@@ -155,7 +161,7 @@ void QFigure::init_user_indicators(void)
     for (int i = 0; i < m_user_indi.size(); i++) {
         auto indi = m_user_indi.at(i);
 
-        struct user_indicator_st st;
+        struct user_series_st st;
         st.idx = i;
         st.shown = 1;
         if (indi->color.length() <= 0 || indi->color == AUTO) {
@@ -288,12 +294,12 @@ void QFigure::draw_left_tips(void)
         }
 
         y+=6;
-        for (int i = 0; i < m_indicators.size(); i++) {
-            auto indi = *m_indicators.at(i);
+        for (int i = 0; i < seriess_.size(); i++) {
+            auto indi = *seriess_.at(i);
             if (cur_idx_ >= indi.data.size()) {
                 continue;
             }
-            if (QUtil::is_system_indicator(indi.name)) {
+            if (QUtil::is_system_series(indi.name)) {
                 continue;
             }
 
@@ -303,8 +309,8 @@ void QFigure::draw_left_tips(void)
             y+=20;
         }
     } else {
-        for (int i = 0; i < m_indicators.size(); i++) {
-            auto indi = *m_indicators.at(i);
+        for (int i = 0; i < seriess_.size(); i++) {
+            auto indi = *seriess_.at(i);
             if (indi.name == INDICATOR_DATE) {
                 continue;
             }
@@ -576,12 +582,12 @@ void QFigure::update_stat(const struct figure_stat &stat)
     update();
 }
 
-void QFigure::setup_indicator(std::vector<PtrIndicator> &indicators, bool custom)
+void QFigure::setup_series(std::vector<PtrSeries> &seriess, bool custom)
 {
     m_default_figure = !custom;
-    m_indicators = indicators;
+    seriess_ = seriess;
 
-    for (auto it = indicators.begin(); it != indicators.end(); it++) {
+    for (auto it = seriess.begin(); it != seriess.end(); it++) {
         const auto indi = *it;
         //LOGD("name:%s len:%ld\n", indi->name.c_str(), indi->data.size());
         if (indi->name == INDICATOR_OPEN) {
@@ -613,7 +619,7 @@ void QFigure::setup_indicator(std::vector<PtrIndicator> &indicators, bool custom
     }
 
     if (m_indi_date == nullptr) {
-        m_indi_date = std::make_shared<struct noise::indicator>();
+        m_indi_date = std::make_shared<struct noise::series>();
         m_indi_date->figure = FIGURE_DEFAULT;
         for (int i = 0; i < m_indi_open->data.size(); i++) {
             m_indi_date->data.push_back(i);
@@ -622,7 +628,7 @@ void QFigure::setup_indicator(std::vector<PtrIndicator> &indicators, bool custom
     assert(m_indi_date != nullptr);
 
     init_figure();
-    init_user_indicators();
+    init_user_seriess();
 }
 
 void QFigure::draw_mouse_cross_line(void)
@@ -640,7 +646,7 @@ void QFigure::draw_mouse_cross_line(void)
         painter.drawLine(getMarginLeft(),mouse_position_.y(),
                      getWidgetWidth()-getMarginRight(),mouse_position_.y());
     } else {
-        if (m_indi_key) {
+        if (m_indi_key && (m_indi_key->size() > cur_idx_)) {
             float y = value_to_y_pos(m_indi_key->data[cur_idx_]);
             painter.drawLine(getMarginLeft(),y, getWidgetWidth()-getMarginRight(),y);
         }
@@ -671,7 +677,11 @@ void QFigure::draw_right_tips()
         y_value =  m_y_max - ( mouse_position_.y() - getMarginTop() ) / m_y_scaler;
         y_pos = mouse_position_.y();
     } else {
-        y_value = m_indi_key->data[cur_idx_];
+        if (cur_idx_ < m_indi_key->size()) {
+            y_value = m_indi_key->data[cur_idx_];
+        } else {
+            y_value = 0;
+        }
         y_pos = value_to_y_pos(y_value);
     }
     {
@@ -685,7 +695,7 @@ void QFigure::draw_right_tips()
     }
 }
 
-void QFigure::draw_user_indicator_name(void)
+void QFigure::draw_user_series_name(void)
 {
     QPainter painter(this);
     QPen     pen;
@@ -703,12 +713,12 @@ void QFigure::draw_user_indicator_name(void)
     }
 }
 
-void QFigure::draw_user_indicator_by_idx(int idx)
+void QFigure::draw_user_series_by_idx(int idx)
 {
-    auto indicator = m_user_indi.at(idx);
+    auto series = m_user_indi.at(idx);
     auto st = m_user_indi_st.at(idx);
 
-    if (indicator->data.size() <= 0) {
+    if (series->data.size() <= 0) {
         return;
     }
     if (start_idx_ < 0) {
@@ -717,12 +727,12 @@ void QFigure::draw_user_indicator_by_idx(int idx)
 
     QVector<QPoint> points;
     for( int i= start_idx_; i < end_idx_; ++i) {
-        if (isnanf(indicator->data[i])) {
+        if (isnanf(series->data[i])) {
             continue;
         }
         QPoint temp;
         temp.setX(index_to_x_pos(i));
-        temp.setY(value_to_y_pos(indicator->data[i]));
+        temp.setY(value_to_y_pos(series->data[i]));
         points.push_back(temp);
     }
 

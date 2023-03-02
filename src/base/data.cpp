@@ -6,7 +6,9 @@ Data::Data(void)
 {
     TRACE_LINE
 
-    m_times = std::make_shared<struct timeseries>();
+    time_index_ = -1;
+    data_processed_ = false;
+    time_series_ = std::make_shared<struct timeseries>();
 }
 
 Data::~Data(void)
@@ -14,48 +16,52 @@ Data::~Data(void)
     TRACE_LINE
 }
 
-PtrIndicator Data::create_indicator(const std::string &name)
+PtrSeries Data::create_series(const std::string &name)
 {
     TRACE_LINE
-    auto indi = std::make_shared<struct indicator>();
+    auto indi = std::make_shared<struct series>();
     indi->name = name;
     indi->figure = FIGURE_DEFAULT;
     indi->color = AUTO;
     indi->gamma = "linear";
     indi->shown_on_mouse = 1;
-    indi->extra.ptime = m_times;
+    indi->extra.ptime = time_series_;
 
-    m_indicators.emplace(name, indi);
+    series_map_.emplace(name, indi);
     return indi;
 }
 
-void Data::init(std::shared_ptr<Broker> broker, std::shared_ptr<Feed> feed, const struct plot_config &config)
+void Data::setup(std::shared_ptr<Broker> broker, std::shared_ptr<Feed> feed, const struct plot_config &config)
 {
-    m_broker = broker;
-    m_feed = feed;
-    m_config = config;
+    broker_ = broker;
+    feed_ = feed;
+    config_ = config;
+}
 
-    //do preload
-    if (feed->is_support_preload()) {
-        auto bars = feed->get_bars();
-        init_default_indicators(bars);
+void Data::process_preload(void)
+{
+    if (feed_->is_support_preload()) {
+        auto bars = feed_->get_bars();
+        process_preload(bars);
+        data_processed_ = true;
     }
 }
 
-void Data::init_default_indicators(std::vector<struct bar> &bars)
+void Data::process_preload(std::vector<struct bar> &bars)
 {
-    auto date   = create_indicator(INDICATOR_DATE);
-    auto open   = create_indicator(INDICATOR_OPEN);
-    auto high   = create_indicator(INDICATOR_HIGH);
-    auto low    = create_indicator(INDICATOR_LOW);
-    auto close  = create_indicator(INDICATOR_CLOSE);
-    auto vol    = create_indicator(INDICATOR_VOLUME);
-    auto chg    = create_indicator(INDICATOR_CHANGES);
-    auto pnl    = create_indicator(INDICATOR_PNL);
+    //default series
+    auto date   = create_series(INDICATOR_DATE);
+    auto open   = create_series(INDICATOR_OPEN);
+    auto high   = create_series(INDICATOR_HIGH);
+    auto low    = create_series(INDICATOR_LOW);
+    auto close  = create_series(INDICATOR_CLOSE);
+    auto vol    = create_series(INDICATOR_VOLUME);
+    auto chg    = create_series(INDICATOR_CHANGES);
+    auto pnl    = create_series(INDICATOR_PNL);
 
     for (auto it = bars.begin(); it != bars.end(); it++) {
         const auto &bar = *it;
-        m_times->time.push_back(bar.time);
+        time_series_->time.push_back(bar.time);
 
         date->data.push_back((float)bar.time);
         open->data.push_back(bar.open);
@@ -67,13 +73,63 @@ void Data::init_default_indicators(std::vector<struct bar> &bars)
 
         //LOGD("--xohlc:%f %f %f %f\n", bar.open, bar.high, bar.low, bar.close);
     }
-    LOGD("bar_len:%d\n", (int)date->data.size());
+    LOGD("bar_len:{}", (int)date->data.size());
+
+    //use series/Indicator
+    auto iter = indicator_map_.begin();
+    while (iter != indicator_map_.end()) {
+        PtrIndicator ptr = iter->second;
+        ptr->init();
+        ptr->update_with_preload();
+        iter++;
+    }
+}
+
+/**
+ * update series/Indicator one by one
+ * 0. increase date index
+ * 1. update default series
+ * 2. update user Indicator series
+ */
+void Data::update_data_series(struct bar &bars)
+{
+    time_index_++;
+
+    //use series/Indicator
+    auto iter = indicator_map_.begin();
+    while (iter != indicator_map_.end()) {
+        PtrIndicator indi = iter->second;
+        indi->increase();
+        iter++;
+    }
+
+    if (data_processed_) {
+        return;
+    }
+
+    // Todo: update data series on bar, one by one
+    return;
+}
+
+PtrSeries Data::find_series(const std::string &name)
+{
+    auto it = series_map_.find(name);
+    if (it != series_map_.end()) {
+        return it->second;
+    } else {
+        return nullptr;
+    }
+}
+
+void Data::push_indicator(const std::string &name, PtrIndicator indi)
+{
+    indicator_map_.emplace(name, indi);
 }
 
 PtrIndicator Data::find_indicator(const std::string &name)
 {
-    auto it = m_indicators.find(name);
-    if (it != m_indicators.end()) {
+    auto it = indicator_map_.find(name);
+    if (it != indicator_map_.end()) {
         return it->second;
     } else {
         return nullptr;
@@ -82,7 +138,7 @@ PtrIndicator Data::find_indicator(const std::string &name)
 
 bool Data::is_support_preload(void)
 {
-    return m_feed->is_support_preload();
+    return feed_->is_support_preload();
 }
 
 void Data::plot(void)
@@ -93,10 +149,15 @@ void Data::plot(void)
         auto ploter = m_func_plot();
 
         //TODO: use map
-        std::vector<PtrIndicator> ind;
-        for (auto const it : m_indicators) {
+        std::vector<PtrSeries> ind;
+        for (auto const it : series_map_) {
             ind.push_back(it.second);
         }
+
+        //user
+        // for (auto const it : indicator_map_) {
+        //     ind.push_back(it.second->);
+        // }
         ploter->plot("default", ind);
     }
 }

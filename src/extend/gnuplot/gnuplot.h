@@ -13,7 +13,7 @@ public:
     GnuPlot(void);
     ~GnuPlot(void);
 
-    void plot(std::string filename, std::vector<PtrIndicator> &indicators);
+    void plot(std::string filename, std::vector<PtrSeries> &seriess);
 
 };
 

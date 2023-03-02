@@ -1,6 +1,9 @@
 #pragma once
 
 #include "noise/noise.h"
+#include "noise/indicator/ma.h"
+#include "noise/indicator/stddev.h"
+#include "noise/indicator/boll.h"
 
 class StrategyCD : public noise::Strategy {
 
@@ -16,27 +19,24 @@ public:
     void on_finish() override;
     void on_destroy() override;
 
-
 private:
-    void update_indicator(void);
 
     void prepare_data(const struct noise::bar &bar);
 
+private:
+    int in_pos_cnt_;
 
 private:
-    int m_cnt;
-    std::string m_code;
-
-    bool m_preloaded_once;
-    noise::PtrIndicator m_close;
+    int index_;
+    std::string code_;
+    noise::PtrSeries series_close_;
 
     std::vector<double> m_cash;
 
-    noise::PtrIndicator m_date;
-    noise::PtrIndicator m_ma5;
-    noise::PtrIndicator m_ma10;
-    noise::PtrIndicator m_stddev5;
-    noise::PtrIndicator m_boll_high;
-    noise::PtrIndicator m_boll_mid;
-    noise::PtrIndicator m_boll_low;
+    noise::ta::Ma *ma5_;
+    noise::ta::Ma *ma10_;
+    noise::ta::Stddev *stddev10_;
+    noise::ta::Boll *boll_;
+
+    noise::ta::Ma *ma60_;
 };

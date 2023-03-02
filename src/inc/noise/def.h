@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
-
+#include <cassert>
 
 #if 0
 #define TRACE_LINE    printf("; %s:%d func:%s()\n", __FILE__, __LINE__, __FUNCTION__);
@@ -40,9 +40,6 @@
 
 #endif
 
-
-#define LOGD printf
-
 #define INDICATOR_DATE      "_date"
 #define INDICATOR_OPEN      "_open"
 #define INDICATOR_HIGH      "_high"
@@ -50,7 +47,10 @@
 #define INDICATOR_CLOSE     "_close"
 #define INDICATOR_VOLUME    "_volume"
 #define INDICATOR_CHANGES   "_changes"
+
 #define INDICATOR_PNL       "_PNL"
+#define INDICATOR_TRADE     "_trade"
+#define INDICATOR_EQUITY    "_equity"
 
 #define FIGURE_DEFAULT      "default"
 #define AUTO                "auto"
@@ -173,22 +173,32 @@ struct timeseries {
     std::vector<time_t> time;
 };
 
-//system default indicator name: _open,_high_,_low,_close,_volume,_changes,_date
-struct indicator {
+struct tradeseries {
+    std::vector<struct trade> trades;
+};
+
+// vector of data(eg. prices), will be plotted on chart
+// system default series name: _open,_high_,_low,_close,_volume,_changes,_date
+struct series {
     std::string name;               //ma5,ma10,stddev;   don't use prefix: "_" 
     std::string figure;             //plotting figure name
     std::string color;              //r,g,b,red,yellow
     std::string gamma;              //linear,log,exp
     int shown_on_mouse;
-    std::string sign;               //arrow,star,circle,rect, "-", "|" "--",
+    std::string sign;               //line,arrow,star,circle,rect,triangle, "-", "|" "--",
     std::vector<float> data;        //
 
     struct {
         std::shared_ptr<struct timeseries> ptime;
         std::string short_name;     //default is name[0:4];
+        std::shared_ptr<struct tradeseries> ptrades;
     } extra;
+
+    time_t get_time(int idx) { return extra.ptime->time[idx]; }
+    float  get(int idx) { return data.at(idx); }
+    int    size(void) { return (int)data.size(); }
 };
 
-using PtrIndicator  = std::shared_ptr<struct indicator>;
+using PtrSeries  = std::shared_ptr<struct series>;
 
 }
