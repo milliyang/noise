@@ -92,7 +92,7 @@ Build on Windows with GUI Ploting
     open noise.sln with VisualStudio
     build and run
 ```
-[![qplot.jpg](https://i.postimg.cc/XN2yHBKH/qplot.jpg)](https://postimg.cc/vDVBDBNf)
+![qplot.jpg](https://github.com/milliyang/noise/blob/main/data/qplot.jpg)
 
 Contibutes
 ----------
