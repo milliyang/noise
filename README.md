@@ -25,9 +25,11 @@ Requirements
 - Qt [Option]           for GUI ploting
 - GCC
 - CMAKE
-- Tiny 3rd lib in: noise/src/3rd
-    - [spdlog](https://github.com/gabime/spdlog) 
+- Tiny 3rd lib in: noise/3rd
+    - [spdlog](https://github.com/gabime/spdlog)
     - [fmt](https://github.com/fmtlib/fmt)
+    - [armmdillo](https://arma.sourceforge.net)
+    - [glob](https://github.com/p-ranav/glob)
 
 Build on Linux
 --------------
