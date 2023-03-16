@@ -1,6 +1,7 @@
 #pragma once
 
 #include "noise/def.h"
+#include "string.h"
 
 namespace noise
 {
@@ -28,7 +29,6 @@ public:
     struct feed_config config_;
 };
 
-
 class FeedCSV : public Feed {
 
 public:
@@ -43,8 +43,9 @@ public:
 private:
     void load_bars(void);
 
-    uint32_t m_idx;
-    std::vector<struct bar> m_vec_bars;
+    uint32_t index_;
+    std::vector<struct bar> bars_;
+    std::string code_;
 };
 
 } // namespace name

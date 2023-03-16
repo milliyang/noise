@@ -2,6 +2,7 @@
 
 #include "noise/def.h"
 #include <cassert>
+#include <armadillo>
 
 namespace noise {
 
@@ -33,6 +34,10 @@ struct BtContext {
     std::shared_ptr<Plot>       plot;
 };
 
+void init(void);
+
+void plot(const std::string figure, const std::vector<float> *series, bool show = false);
+
 }
 
 //include all noise headers here:
@@ -45,6 +50,7 @@ struct BtContext {
 #include "noise/data.h"
 #include "noise/plot.h"
 #include "noise/indicator/indicator.h"
+#include "noise/mcache.h"
 
 //at last
 #include "noise/backtest.h"

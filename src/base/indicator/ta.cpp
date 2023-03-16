@@ -13,6 +13,9 @@ namespace ta {
  */
 bool crossover(Indicator*inditor0, Indicator*inditor1, bool golden)
 {
+    assert(inditor0 != nullptr);
+    assert(inditor1 != nullptr);
+
     if (golden) {
         bool last_day_lteq = inditor0->get(-1) <= inditor1->get(-1) ? true : false;
         if (!last_day_lteq) {
@@ -32,11 +35,27 @@ bool crossover(Indicator*inditor0, Indicator*inditor1, bool golden)
     }
 }
 
+bool above(Indicator*inditor0, Indicator*inditor1)
+{
+    assert(inditor0 != nullptr);
+    assert(inditor1 != nullptr);
+    return (inditor0->get(0) > inditor1->get(0)) ? true : false;
+}
+
+bool below(Indicator*inditor0, Indicator*inditor1)
+{
+    assert(inditor0 != nullptr);
+    assert(inditor1 != nullptr);
+    return (inditor0->get(0) < inditor1->get(0)) ? true : false;
+}
+
 /**
  * compare two series golden cross or deadth cross
  */
 bool crossover(PtrSeries& series0, PtrSeries& series1, int idx, bool golden)
 {
+    assert(series0 != nullptr);
+    assert(series1 != nullptr);
     assert(series0->size() == series1->size());
     if (series0->size() <= idx) {
         return false;

@@ -42,7 +42,16 @@ void Ma::init(void)
 
 void Ma::next(const struct noise::bar &bar)
 {
-    LOGW("TODO:");
+    if (preload_done_) {
+        return;
+    }
+    assert(series_.get() != nullptr);
+    assert(series_ref_.get() != nullptr);
+    noise::uta::ma_s(series_->data, series_ref_->data, period_);
+
+    //TODO:
+    // we havn't use bar, but use series_ref_ !!!
+    // it's not peek
 }
 
 float Ma::get_by_index(int idx)
@@ -64,7 +73,8 @@ void Ma::update_with_preload(void)
 {
     assert(series_.get() != nullptr);
     assert(series_ref_.get() != nullptr);
-    noise::utalib::ma(series_->data, series_ref_->data, period_);
+    noise::uta::ma(series_->data, series_ref_->data, period_);
+    preload_done_ = true;
 }
 
 

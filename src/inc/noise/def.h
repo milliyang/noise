@@ -63,6 +63,13 @@
 
 namespace noise {
 
+using PtrSeries  = std::shared_ptr<struct series>;
+using VecF  = std::vector<float>;
+using VecI  = std::vector<int>;
+using VecS  = std::vector<std::string>;
+
+struct bt_config;
+
 struct code_info {
     std::string code;           //"000001.SZ", unique | security
     std::string symbol;         //"000001"
@@ -71,6 +78,7 @@ struct code_info {
     std::string industry;       //"银行"
     std::string market;         //"主板"
     int list_date;              //[YYYYMMDD] 19910403
+    std::string seq;
 };
 
 struct bar {
@@ -167,6 +175,10 @@ struct stat {
     //float profit_factor;
     //float expectancy;
     float SQN;
+
+    struct {
+        int win_trade_cnt;
+    } extra;
 };
 
 struct timeseries {
@@ -175,6 +187,11 @@ struct timeseries {
 
 struct tradeseries {
     std::vector<struct trade> trades;
+};
+
+struct chart_info {
+    std::string code;
+    struct code_info basic;
 };
 
 // vector of data(eg. prices), will be plotted on chart
@@ -186,12 +203,13 @@ struct series {
     std::string gamma;              //linear,log,exp
     int shown_on_mouse;
     std::string sign;               //line,arrow,star,circle,rect,triangle, "-", "|" "--",
-    std::vector<float> data;        //
+    VecF data;                      //
 
     struct {
-        std::shared_ptr<struct timeseries> ptime;
         std::string short_name;     //default is name[0:4];
+        std::shared_ptr<struct timeseries>  ptime;
         std::shared_ptr<struct tradeseries> ptrades;
+        std::shared_ptr<struct chart_info>  info;
     } extra;
 
     time_t get_time(int idx) { return extra.ptime->time[idx]; }
@@ -199,6 +217,5 @@ struct series {
     int    size(void) { return (int)data.size(); }
 };
 
-using PtrSeries  = std::shared_ptr<struct series>;
 
 }

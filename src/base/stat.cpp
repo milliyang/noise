@@ -53,7 +53,7 @@ void Stat::plot(void)
 {
     TRACE_LINE
 
-    uprint::print("Stat", m_stat);
+    uprint::print("Stat", status_);
 }
 
 void Stat::on_trade_day(void)
@@ -73,6 +73,11 @@ void Stat::on_finish(void)
     calc_stat();
     generate_trade_series();
     generate_equity_series();
+}
+
+const struct stat& Stat::get_stat(void)
+{
+    return status_;
 }
 
 void Stat::generate_trade_series(void)
@@ -108,7 +113,7 @@ void Stat::generate_trade_series(void)
 
         for (; index < ptime->time.size();) {
             if (ptime->time[index] == time) {
-                LOGI("match time:{} {} pnl:{:6.2f}%", ptime->time[index], time, pnl);
+                LOGD("match time:{} {} pnl:{:6.2f}%", ptime->time[index], time, pnl);
                 a_series->data[index] = pnl; //trade_iter->PNL;
                 break;
             }
@@ -141,46 +146,50 @@ void Stat::calc_stat(void)
     struct bar first_bar, last_bar;
     broker_->get_first_and_last_bars(first_bar,last_bar);
 
-    float equity_base = 10000;
-    float equity_cur  = equity_base;
+    const float INITIAL_EQUITY = broker_->get_init_equity();
+    float equity_cur  = INITIAL_EQUITY;
     int win_cnt = 0;
 
     float best_trade_on_pnl,   worst_trade_on_pnl;
     float best_trade_on_ratio, worst_trade_on_ratio;
     float avg_profit_ratio = 0;
-    std::vector<float> vec_pnl;
-    std::vector<int> vec_duration;  //second
-    std::vector<int> vec_exposure;
-    int max_duration = 0;           //second
+    VecF vec_pnl;
+    VecI vec_duration;      //second
+    VecI vec_exposure;
+    int max_duration = 0;   //second
 
     const auto &trade0 = *trades.begin();
     best_trade_on_pnl = worst_trade_on_pnl = trade0.PNL;
     best_trade_on_ratio = worst_trade_on_ratio = trade0.profit();
 
-    m_stat.start_time = first_bar.time;
-    m_stat.end_time = last_bar.time;
+    status_.start_time = first_bar.time;
+    status_.end_time = last_bar.time;
 
     //printf("first_bar.time :%d\n", first_bar.time);
     //printf("last_bar.time  :%d\n", last_bar.time);
 
-    //m_stat.duration = utime::get_duration(first_bar.time, last_bar.time);
-    m_stat.duration = utime::get_duration(last_bar.time - first_bar.time);
-    vec_exposure.resize(m_stat.duration);
+    //status_.duration = utime::get_duration(first_bar.time, last_bar.time);
+    status_.duration = utime::get_duration(last_bar.time - first_bar.time);
+    vec_exposure.resize(status_.duration);
+
+    int index = 0;
+    auto a_series = data_->create_series(INDICATOR_CLOSE);
+    const auto ptime = a_series->extra.ptime;
 
     for (auto it = trades.begin(); it != trades.end(); ++it) {
         const struct trade& trade = *it;
 
-        // if (m_stat.start_time > trade.entry_time) {
-        //     m_stat.start_time = trade.entry_time;
+        // if (status_.start_time > trade.entry_time) {
+        //     status_.start_time = trade.entry_time;
         // }
-        // if (m_stat.end_time < trade.exit_time) {
-        //     m_stat.end_time = trade.exit_time;
+        // if (status_.end_time < trade.exit_time) {
+        //     status_.end_time = trade.exit_time;
         // }
-        m_stat.PNL += trade.PNL;
+        status_.PNL += trade.PNL;
         equity_cur += trade.PNL;
 
-        if (m_stat.equity_peak < equity_cur) {
-            m_stat.equity_peak = equity_cur;
+        if (status_.equity_peak < equity_cur) {
+            status_.equity_peak = equity_cur;
         }
         if (trade.PNL > 0) {
             win_cnt++;
@@ -210,8 +219,22 @@ void Stat::calc_stat(void)
         vec_duration.push_back(dura);
 
 #if 0
-        int dura_offset = trade.entry_time - first_bar.time;
-        int dura_days = trade.exit_time - trade.entry_time;
+        //buggy
+        //TODO:
+        // create map[date, time_index] for quick lookup, many place need it
+        //
+
+        //find index
+        int dura_offset = 0;
+        for (; index < ptime->time.size();) {
+            if (ptime->time[index] == trade.entry_time) {
+                dura_offset = index;
+                break;
+            }
+            index++;
+        }
+
+        int dura_days = utime::get_duration(trade.entry_time, trade.exit_time);
         for (int i = 0; i <= dura_days; i++) {
             if (dura_offset+i >= vec_exposure.size()) {
                 printf("[err] dura_offset+i:%d %d\n", dura_offset, i);
@@ -222,31 +245,32 @@ void Stat::calc_stat(void)
 #endif
     }
     int exposion_days = umath::sum(vec_exposure);
-    m_stat.exposure_time = (float) exposion_days / (float) m_stat.duration;
+    status_.exposure_time = (float) exposion_days / (float) status_.duration * 100.0f;
 
     //
-    m_stat.trade_cnt = (int) trades.size();
-    m_stat.equity_final = equity_base+m_stat.PNL;
-    m_stat.return_final = m_stat.PNL / equity_base;
-    m_stat.return_buy_and_hold = (last_bar.close - first_bar.open) / first_bar.open;
-    m_stat.win_ratio = (float) win_cnt / (float)trades.size();
-    m_stat.best_trade_on_PNL = best_trade_on_pnl;
-    m_stat.worst_trade_on_PNL = worst_trade_on_pnl;
-    m_stat.best_trade = best_trade_on_ratio;
-    m_stat.worst_trade = worst_trade_on_ratio;
-    m_stat.avg_trade = avg_profit_ratio / trades.size();
+    status_.trade_cnt = (int) trades.size();
+    status_.equity_final = INITIAL_EQUITY+status_.PNL;
+    status_.return_final = status_.PNL / INITIAL_EQUITY;
+    status_.return_buy_and_hold = (last_bar.close - first_bar.open) / first_bar.open;
+    status_.win_ratio = (float) win_cnt / (float)trades.size();
+    status_.best_trade_on_PNL = best_trade_on_pnl;
+    status_.worst_trade_on_PNL = worst_trade_on_pnl;
+    status_.best_trade = best_trade_on_ratio;
+    status_.worst_trade = worst_trade_on_ratio;
+    status_.avg_trade = avg_profit_ratio / trades.size();
 
     //convert second to duration
-    m_stat.avg_trade_duration = (float) umath::mean(vec_duration);
-    m_stat.max_trade_duration = (float) max_duration;
+    status_.avg_trade_duration = (float) umath::mean(vec_duration);
+    status_.max_trade_duration = (float) max_duration;
 
-    m_stat.avg_trade_duration = (float) utime::get_duration((time_t)m_stat.avg_trade_duration);
-    m_stat.max_trade_duration = (float) utime::get_duration((time_t)m_stat.max_trade_duration);
+    status_.avg_trade_duration = (float) utime::get_duration((time_t)status_.avg_trade_duration);
+    status_.max_trade_duration = (float) utime::get_duration((time_t)status_.max_trade_duration);
 
     //
-    m_stat.SQN = sqrtf((float)trades.size()) * umath::mean(vec_pnl) / umath::stddev(vec_pnl);
+    status_.SQN = sqrtf((float)trades.size()) * umath::mean(vec_pnl) / umath::stddev(vec_pnl);
     //s.loc['SQN'] = np.sqrt(n_trades) * pl.mean() / (pl.std() or np.nan)
 
+    status_.extra.win_trade_cnt = win_cnt;
 
     //update PNL series
 }
@@ -255,7 +279,7 @@ void Stat::init(std::shared_ptr<Broker> broker, std::shared_ptr<Data> data)
 {
     broker_ = broker;
     data_ = data;
-    memset(&m_stat, 0, sizeof(m_stat));
+    memset(&status_, 0, sizeof(status_));
 }
 
 

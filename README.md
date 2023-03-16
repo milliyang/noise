@@ -15,9 +15,9 @@ Features
 * Simple, no-documented API / structure
 * Composable Strategies / Broker / Feed / Ploting
 * Support different ways of Backtest (SimpleBroker/BrokerMuxer/EventDriven/PreProcessed)
-* Cheap Detailed results
-* Cheap Visualizations
-* Cheap Talib
+* Cheap Backtest Result
+* Cheap Visualization
+* Cheap TA-Lib
 
 Requirements
 ------------
@@ -35,15 +35,14 @@ Build on Linux
 --------------
 ```sh
     cd noise
-    mkdir build
-    cd build
+    mkdir build && cd build
     cmake ..
     make && ./bt
 ```
 
 Usage
 -----
-```c
+```sh
     make && ./bt
 ```
 
@@ -81,26 +80,24 @@ Results in:
 [main] time elapsed: 12.594399 ms
 ```
 
-Find more usage examples in dir noise/src/sample/
-
+Find more usage examples in dir noise/sample/
 
 Build on Windows with GUI Ploting
 --------------
 ```sh
     cd noise
-    mkdir build
-    cd build
-    cmake ../noise/sample/cd
-    open noise.sln with VisualStudio
-    build and run
+    mkdir build && cd build
+    cmake ../sample/cd
+    MSBuild.exe noise.sln           # require VisualStudio
+    .\Debug\bt.exe
 ```
-![qplot](https://bg-so-1.zippyimage.com/2023/03/12/4f0a4a172cc3761cf68bee597bb7612d.png)
+![output_image](https://bg-so-1.zippyimage.com/2023/03/12/4f0a4a172cc3761cf68bee597bb7612d.png)
 
 Contibutes
 ----------
 - Always welcomed ( Feature or Bugfix or Unitest )
 - Platform Independent
-- Simple is the most important thing. No heavy / fancy code. No 3rd library(Hope).
+- Simple is the most important thing. No heavy / fancy code. Not much 3rd library I Hope...
 - Keep less code
 
 Final

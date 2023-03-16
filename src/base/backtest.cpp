@@ -5,6 +5,7 @@
 #include "noise/strategy.h"
 #include "noise/feed.h"
 #include "noise/util.h"
+#include "noise/args.h"
 
 #ifdef __SUPPORT_OPENMP_TASK__
 #include <omp.h>
@@ -15,20 +16,19 @@
 namespace noise {
 
 Backtest::Backtest(void):
-    m_build_date(__DATE__)
+    build_date_(__DATE__)
 {   
-    m_func_get_stragegy = [](){ return std::make_shared<StrategyABC>(); };
+    func_get_strategy_ = [](){ return std::make_shared<StrategyABC>(); };
 }
 
-Backtest::Backtest(FuncStrategy func):
-    m_build_date(__DATE__)
+Backtest::Backtest(FuncStrategy func)
+    : build_date_(__DATE__)
 {
-    m_func_get_stragegy = func;
+    func_get_strategy_ = func;
 }
 
 Backtest::~Backtest(void)
 {
-    //std::cout << __FUNCTION__ << std::endl;
 }
 
 void Backtest::make_strategy(uint32_t id)
@@ -41,7 +41,7 @@ void Backtest::make_strategy(uint32_t id)
     ctx.data   = std::make_shared<Data>();
     ctx.stat->init(ctx.broker, ctx.data);
 
-    ctx.strategy = m_func_get_stragegy();
+    ctx.strategy = func_get_strategy_();
     ctx.strategy->set_id(id);
     ctx.strategy->init(ctx.broker);
     ctx.strategy->set_context(ctx);
@@ -60,10 +60,11 @@ void Backtest::make_strategy(uint32_t id)
     ctx.data->setup(ctx.broker, ctx.feed, config_.plot);
     ctx.data->setup_plot(config_.func.plot);
 
-    m_v_context.push_back(ctx);
-    if (id == 0) { m_context = ctx; }
-
-    TRACE_LINE
+    ctx.strategy->set_code(config_.codes.at(id));
+    context_vector_.push_back(ctx);
+    if (id == 0) {
+        context_ = ctx;
+    }
 }
 
 void Backtest::run_strategy(const struct BtContext &ctx)
@@ -75,6 +76,7 @@ void Backtest::run_strategy(const struct BtContext &ctx)
 
     ctx.strategy->on_bar_start();
     while(ctx.feed->next(bar)) {
+        LOGD("{}", bar.date);
         ctx.data->update_data_series(bar);
         ctx.broker->process(bar);
         ctx.strategy->next(bar);
@@ -89,16 +91,18 @@ void Backtest::run_strategy(const struct BtContext &ctx)
     ctx.strategy->on_finish();
 }
 
+/**
+ * @brief create strategy
+ */
 void Backtest::init(void)
 {
     config_.mode = BT_MODE_ONE2ONE;
 
     make_strategy(0);
-    assert(m_v_context.size() == 1);
-
+    assert(context_vector_.size() == 1);
 
     int strategy_context_num;
-    if (config_.mode == BT_MODE_ONE2ONE) {
+    if (config_.mode == BT_MODE_M2ONE) {
         strategy_context_num = 1;
     } else {
         strategy_context_num = (int) config_.codes.size();
@@ -112,41 +116,53 @@ void Backtest::init(void)
 
 void Backtest::deinit(void)
 {
-    m_context.strategy->on_destroy();
+    context_.strategy->on_destroy();
 }
 
 /**
- * @brief run strategy
+ * @brief run backtest
  */
 void Backtest::run()
 {
-    struct bar bar;
-    bar.time = 0;
-    TRACE_LINE
-    /**
-     * @brief TODO:
-     *
-     * 0. load config
-     * 1. load bars from feed
-     * 2. calc series (MACD,STDDEV)
-     * 3. for bars:
-     *      next()
-     * 4. calc stat, PNL
-     * 5. plot
-     */
-
     init();
 
-    if (config_.mode == BT_MODE_ONE2ONE) {
-        run_strategy(m_context);
+    if (config_.mode == BT_MODE_M2ONE) {
+        run_strategy(context_);
     } else {
 #ifdef __SUPPORT_OPENMP_TASK__
 // #pragma omp parallel for num_threads(OPENMP_CPU_CORE)
 #pragma omp parallel for
 #endif
-        for (int i = 0; i < m_v_context.size(); i++) {
-            run_strategy(m_v_context.at(i));
+        for (int i = 0; i < context_vector_.size(); i++) {
+            run_strategy(context_vector_.at(i));
         }
+    }
+
+    //show total summary of all backtests
+    if (context_vector_.size() > 1) {
+        struct stat status;
+        memset(&status, 0, sizeof(struct stat));
+
+        for (int i = 0; i < context_vector_.size(); i++) {
+            auto st = context_vector_[i].stat->get_stat();
+            if (i == 0) {
+                status.start_time   = st.start_time;
+                status.end_time     = st.end_time;
+            }
+            status.PNL                  += st.PNL;
+            status.trade_cnt            += st.trade_cnt;
+            status.extra.win_trade_cnt  += st.extra.win_trade_cnt;
+            status.equity_final         += st.equity_final;
+            //
+            status.best_trade_on_PNL  = std::max(status.best_trade_on_PNL, st.best_trade_on_PNL);
+            status.worst_trade_on_PNL = std::min(status.worst_trade_on_PNL, st.worst_trade_on_PNL);
+            status.equity_peak        = std::max(status.equity_peak, st.equity_peak);
+        }
+
+        status.equity_final /= (float) context_vector_.size();
+        status.win_ratio     = (float) status.extra.win_trade_cnt / (float) status.trade_cnt;
+
+        uprint::print("All Code", status);
     }
 
     deinit();

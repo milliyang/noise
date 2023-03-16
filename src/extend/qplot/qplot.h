@@ -13,7 +13,8 @@ public:
     QPlot(void);
     ~QPlot(void);
 
-    void plot(std::string filename, std::vector<PtrSeries> &seriess);
+    void plot(std::string win_title, std::vector<PtrSeries> &seriess);
+    void plotChart(std::string win_title, std::vector<PtrSeries> &seriess);
 
 };
 

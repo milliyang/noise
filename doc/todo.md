@@ -4,9 +4,14 @@ TODO LIST (20230111)
 ```
 - spdlog/fmt                                                        =>done
 - talib more series: ma,stddev,boll                                 =>done
+- add pnl figure                                                    =>done
+- handy noise::plot()                                               =>done
+- Plot stock name, symbol                                           =>done
+- select area for pattern detection                                 =>skip
+- sum total pnl & trade                                             =>done
+- support without preload  (avoid peek data ahead)                  =>done
 
 - yml or ini config
-- add pnl figure
 - show buy,sell check point ( special series: start,arrow,triangle,text)
 - update data when not support preload
 
@@ -87,5 +92,8 @@ import mplfinance as mpf  # Please install mplfinance as follows: pip install mp
 stock_us_daily_df = ak.stock_us_daily(symbol="AAPL", adjust="qfq")
 
 
+image hosting:  https://zippyimage.com/
+
 
 ```
+

@@ -2,6 +2,7 @@
 
 #include <functional>
 #include "noise/noise.h"
+#include "noise/args.h"
 
 namespace noise
 {
@@ -22,6 +23,7 @@ struct bt_config {
     struct feed_config feed;
     struct plot_config plot;
     struct bt_func func;
+    struct args0 args;
 };
 
 class Backtest {
@@ -37,20 +39,18 @@ private:
     void init();
     void deinit();
 
-    void load_config(std::string filepath);
-
     void make_strategy(uint32_t id);
     void run_strategy(const struct BtContext &context);
 
-    //
-private:
-    FuncStrategy m_func_get_stragegy;
-    struct BtContext m_context;
-    std::vector<struct BtContext> m_v_context;
+    void load_config(std::string filepath);
 
-    //others
 private:
-    const std::string m_build_date;
+    FuncStrategy func_get_strategy_;
+    struct BtContext context_;
+    std::vector<struct BtContext> context_vector_;
+
+private:
+    const std::string build_date_;
     struct bt_config config_;
 };
 

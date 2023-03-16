@@ -1,4 +1,4 @@
-#include "noise/noise.h"
+ #include "noise/noise.h"
 #include "noise/indicator/stddev.h"
 #include "noise/log.h"
 #include <cassert>
@@ -49,7 +49,14 @@ void Stddev::init(void)
 
 void Stddev::next(const struct noise::bar &bar)
 {
-    LOGW("TODO:");
+    if (preload_done_) {
+        return;
+    }
+
+    assert(series_.get() != nullptr);
+    assert(series_ref_.get() != nullptr);
+    LOGI("stddev {} {}",  series_->data.size(), series_ref_->data.size());
+    noise::uta::stddev(series_->data, series_ref_->data, period_, divided_by_unit_);
 }
 
 float Stddev::get_by_index(int idx)
@@ -73,7 +80,7 @@ void Stddev::update_with_preload(void)
     assert(series_.get() != nullptr);
     assert(series_ref_.get() != nullptr);
     //LOGI("{} {}", __FUNCTION__, name_);
-    noise::utalib::stddev(series_->data, series_ref_->data, period_, divided_by_unit_);
+    noise::uta::stddev(series_->data, series_ref_->data, period_, divided_by_unit_);
 }
 
 }

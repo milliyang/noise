@@ -4,7 +4,7 @@
 #include <QTranslator>
 // 3rd/qline/src
 #include "qplotwindow.h"
-
+#include "qplotchartwindow.h"
 
 namespace noise {
 
@@ -49,6 +49,21 @@ void QPlot::plot(std::string filename, std::vector<PtrSeries> &seriess)
     app.exec();
 }
 
+void QPlot::plotChart(std::string win_title, std::vector<PtrSeries> &seriess)
+{
+    int argc = 0;
+    QApplication app(argc, NULL);
+
+    QTranslator translator;
+    translator.load("myI18N_zh_CN.qm");
+    app.installTranslator(&translator);
+
+    qplot::QPlotChartWindow window;
+    window.plot(seriess);
+    window.show();
+
+    app.exec();
+}
 
 #if 0
     //sample code

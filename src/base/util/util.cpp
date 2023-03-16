@@ -4,7 +4,64 @@
 #include "noise/util.h"
 #include "noise/log.h"
 
+#include "3rd/INIReader.h"
+
+#include <string.h>
+
 namespace noise {
+
+std::vector<std::string> split(const std::string& s, char delimiter)
+{
+   std::vector<std::string> tokens;
+   std::string token;
+   std::istringstream tokenStream(s);
+   while (std::getline(tokenStream, token, delimiter))
+   {
+      tokens.push_back(token);
+   }
+   return tokens;
+}
+
+std::vector<std::string> split_without_string(const std::string& s, char delimiter)
+{
+   std::vector<std::string> tokens;
+   std::string token;
+   std::istringstream tokenStream(s);
+   while (std::getline(tokenStream, token, delimiter))
+   {
+       //remove ' '
+       token.erase(0,token.find_first_not_of(" "));
+       token.erase(token.find_last_not_of(" ") + 1);
+
+       //remove '"'
+       token.erase(0, token.find_first_not_of("\""));
+       token.erase(token.find_last_not_of("\"") + 1);
+       tokens.push_back(token);
+   }
+   return tokens;
+}
+
+std::string ext_to_lower_case(const std::string& s, char delimiter)
+{
+    std::string lower(s);
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    std::vector<std::string> vstr = split(lower, '.');
+    if (vstr.size() <= 1) {
+        return lower;
+    }
+    std::string ext = vstr[vstr.size()-1];
+    return ext;
+}
+
+bool is_file_ext(const std::string&s, const std::string&ext, char delimiter)
+{
+    std::string lower_ext = ext_to_lower_case(s, delimiter);
+    if (lower_ext == ext) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 void util::parse_csv_bars_file(std::vector<struct bar> &bars, const std::string &filepath)
 {
@@ -74,6 +131,118 @@ void util::parse_csv_bars_file(std::vector<struct bar> &bars, const std::string 
         }
         cnt++;
     }
+}
+
+void util::parse_ini_code_file(std::vector<struct code_info> &codes, const std::string &filepath)
+{
+    INIReader reader(filepath);
+
+    if (reader.ParseError() < 0) {
+        LOGE("Can't load 'test.ini'");
+        return;
+    }
+    auto codes_str = reader.Get("Backtest", "codes", "NULL");
+    if (codes_str == "NULL") {
+        return;
+    }
+    auto the_codes = split(codes_str, ',');
+
+    for (auto iter = the_codes.begin(); iter != the_codes.end(); iter++) {
+        struct code_info info;
+        info.code = *iter;
+        codes.push_back(info);
+    }
+    return;
+}
+
+void util::parse_csv_code_file(std::vector<struct code_info> &codes, const std::string &filepath)
+{
+    std::ifstream input{filepath};
+    //
+    // seq,ts_code,symbol,name,area,industry,market,list_date
+    // 0,000001.SZ,000001,平安银行,深圳,银行,主板,19910403
+    // 1,000002.SZ,000002,万科A,深圳,全国地产,主板,19910129
+    if (!input.is_open()) {
+        LOGE("open failed: {}", filepath);
+        return;
+    }
+
+    int column = 0;
+    for (std::string line; std::getline(input, line);) {
+        std::istringstream ss(std::move(line));
+        std::vector<std::string> one_row;
+
+        for (std::string value; std::getline(ss, value, ',');) {
+            one_row.push_back(std::move(value));
+        }
+        if (column == 0) {
+            if (one_row.at(0) != "seq") {
+                LOGE("parse failed: {}", line);
+                return;
+            }
+            column = (int) one_row.size();
+            continue;
+            //printf("bars column:%d\n", (int)one_row.size());
+        } else {
+            if (column != one_row.size()) {
+                LOGW("invalid line: {}", line);
+                continue; //ignore
+            }
+            struct code_info info;
+            int i = 0;
+            info.seq         = one_row.at(i++);
+            info.code        = one_row.at(i++);
+            info.symbol      = one_row.at(i++);
+            info.name        = one_row.at(i++);
+            info.area        = one_row.at(i++);
+            info.industry    = one_row.at(i++);
+            info.market      = one_row.at(i++);
+            info.list_date   = std::stoi(one_row.at(i++));
+            codes.push_back(info);
+            //uprint::print("", info);
+        }
+    }
+    return;
+}
+
+void util::parse_code_file(std::vector<code_info> &codes, const std::string &filepath)
+{
+    if (is_file_ext(filepath, "csv", '.')) {
+        parse_csv_code_file(codes, filepath);
+    } else {
+        parse_ini_code_file(codes, filepath);
+    }
+}
+
+std::string util::get_filename_with_extension(const std::string& filepath)
+{
+    char sep = '/';
+#ifdef _WIN32
+    sep = '\\';
+#endif
+    size_t i = filepath.rfind(sep, filepath.length());
+    if (i != std::string::npos) {
+        std::string filename = filepath.substr(i+1, filepath.length() - i);
+        std::string rawname = filename.substr(0, filepath.length());
+        return(rawname);
+    }
+    return"";
+}
+
+std::string util::get_filename_without_extension(const std::string& filepath)
+{
+    char sep = '/';
+#ifdef _WIN32
+    sep = '\\';
+#endif
+    size_t i = filepath.rfind(sep, filepath.length());
+    if (i != std::string::npos) {
+        std::string filename = filepath.substr(i+1, filepath.length() - i);
+        size_t lastindex = filename.find_last_of(".");
+        std::string rawname = filename.substr(0, lastindex);
+        return(rawname);
+    }
+    return"";
 }
 
 

@@ -5,6 +5,7 @@
 #define MIN_BAR                 (10)
 
 #define Y_MIN                   (10000000)
+#define MOUSE_MOVE_SPEED        (40)     //small number, faster
 
 namespace qplot
 {
@@ -31,7 +32,7 @@ void QFigure::init_figure(void)
 
     CHK_NULL_INDI(m_indi_date);
 
-    int num = m_indi_date->data.size();
+    int num = (int) m_indi_date->data.size();
 
     start_idx_ = cur_idx_ = 0;
     end_idx_ = num-1;
@@ -52,6 +53,7 @@ void QFigure::update_figure(void)
 {
     CHK_NULL_INDI(m_indi_date);
 
+    //bugfix:
     if (start_idx_ < 0) {
         start_idx_ = 0;
     }
@@ -197,15 +199,15 @@ void QFigure::draw_right_y_coordinate_info(void)
     float x = getWidgetWidth() - getMarginRight() + DEFAULT_TIPS_GAP;
 
     if (getHGridNum() == 0) {
-        str.sprintf("%.2f",m_y_min);
+        str = QString("%1").arg(m_y_min, 2, 'f', 2);
         painter.drawText(QPoint(x, getWidgetHeight() - getMarginBottom() ), str);
-        str.sprintf("%.2f",m_y_max);
+        str = QString("%1").arg(m_y_max, 2, 'f', 2);
         painter.drawText(QPoint(x, getMarginTop() ), str);
         return;
     }
 
-    for (int i=0; i <= getHGridNum(); ++i) {
-        str.sprintf("%.2f",m_y_min + i* step);
+    for (int i=0; i <= getHGridNum(); ++i) {        
+        str = QString("%1").arg(m_y_min + i* step, 2, 'f', 2);
         painter.drawText(QPoint(x, getWidgetHeight() - getMarginBottom() - i*getAtomGridHeight()), str);
     }
 }
@@ -240,13 +242,13 @@ void QFigure::draw_left_tips(void)
     }
     {
         QRect rect(x,y,1000,30);
-        str.sprintf("%s", stime.substr(0,8).c_str());
+        str = QString("%1").arg(stime.substr(0, 8).c_str());
         painter.drawText(rect, str);
         y+=20;
     }
     {
         QRect rect(x,y,1000,30);
-        str.sprintf(" / %s", stime.substr(9).c_str());
+        str = QString(" / %1").arg(stime.substr(9).c_str());
         painter.drawText(rect, str);
         y+=20;
     }
@@ -254,37 +256,37 @@ void QFigure::draw_left_tips(void)
     if (m_figure_name == FIGURE_DEFAULT) {
         {
             QRect rect(x,y,1000,30);
-            str.sprintf("O: %.2f", m_indi_open->data[cur_idx_]);
+            str = QString("O: %1").arg(m_indi_open->data[cur_idx_], 2, 'f' ,2);
             painter.drawText(rect, str);
             y+=20;
         }
         {
             QRect rect(x,y,1000,30);
-            str.sprintf("H: %.2f", m_indi_high->data[cur_idx_]);
+            str = QString("H: %1").arg(m_indi_high->data[cur_idx_], 2, 'f' ,2);
             painter.drawText(rect, str);
             y+=20;
         }
         {
             QRect rect(x,y,1000,30);
-            str.sprintf("L: %.2f", m_indi_low->data[cur_idx_]);
+            str = QString("L: %1").arg(m_indi_low->data[cur_idx_], 2, 'f' ,2);
             painter.drawText(rect, str);
             y+=20;
         }
         {
             QRect rect(x,y,1000,30);
-            str.sprintf("C: %.2f", m_indi_close->data[cur_idx_]);
+            str = QString("C: %1").arg(m_indi_close->data[cur_idx_], 2, 'f' ,2);
             painter.drawText(rect, str);
             y+=20;
         }
         if (m_indi_chg) {
             QRect rect(x,y,1000,30);
-            str.sprintf("Chg:%+0.2f%%", m_indi_chg->data[cur_idx_]);
+            str = QString("Chg: %1%%").arg(m_indi_chg->data[cur_idx_], 2, 'f' ,2);
             painter.drawText(rect, str);
             y+=20;
         }
         if (m_indi_volume) {
             QRect rect(x,y,1000,30);
-            str.sprintf("V: %0.1fK", m_indi_volume->data[cur_idx_] / 1000.0f);
+            str = QString("V: %1K").arg(m_indi_volume->data[cur_idx_] / 1000.0f, 2, 'f' ,1);
             painter.drawText(rect, str);
             y+=20;
         }
@@ -302,9 +304,9 @@ void QFigure::draw_left_tips(void)
             if (QUtil::is_system_series(indi.name)) {
                 continue;
             }
-
             QRect rect(x,y,1000,30);
-            str.sprintf("%s:%0.1f", indi.name.c_str(), indi.data[cur_idx_]);
+            str = QString("%1:%2").arg(indi.name.c_str())
+                                  .arg(indi.data[cur_idx_], 2, 'f' ,1);
             painter.drawText(rect, str);
             y+=20;
         }
@@ -318,7 +320,8 @@ void QFigure::draw_left_tips(void)
                 continue;
             }
             QRect rect(x,y,1000,30);
-            str.sprintf("%s:%0.1f", indi.name.c_str(), indi.data[cur_idx_]);
+            str = QString("%1:%2").arg(indi.name.c_str())
+                                  .arg(indi.data[cur_idx_], 2, 'f' ,1);
             painter.drawText(rect, str);
             y+=20;
         }
@@ -437,7 +440,7 @@ void QFigure::keyPressEvent(QKeyEvent *event)
 {
     m_is_key_down = true;
 
-    int bar_num = m_indi_date->data.size();
+    int bar_num = (int) m_indi_date->data.size();
 
     switch(event->key()) {
     case Qt::Key_Home:
@@ -531,7 +534,7 @@ void QFigure::emit_stat_changed(void)
 void QFigure::update_index(float factor)
 {
     CHK_NULL_INDI(m_indi_date);
-    int bar_num = m_indi_date->data.size();
+    int bar_num = (int) m_indi_date->data.size();
 
     if (factor < 1.0f) {
         if (total_idx_len_ < MIN_BAR * 2) {
@@ -563,7 +566,7 @@ void QFigure::update_stat(const struct figure_stat &stat)
     //LOGD("%s emit recv\n", get_id().toString().toStdString().c_str());
 
     CHK_NULL_INDI(m_indi_date);
-    int bar_num = m_indi_date->data.size();
+    int bar_num = (int) m_indi_date->data.size();
 
     //update stat
     start_idx_ = stat.start_idx;
@@ -691,7 +694,7 @@ void QFigure::draw_right_tips()
     {
         QRect rect(x + tips_width/4, y_pos - tips_height/4, tips_width, tips_height);
         QString str;
-        painter.drawText(rect, str.sprintf("%.2f",y_value));
+        painter.drawText(rect, QString("%1").arg(y_value, 2, 'f', 2));
     }
 }
 
@@ -751,19 +754,22 @@ void QFigure::mouseMoveEvent(QMouseEvent *event)
     bool move_right = mouse_position_.x() > event->pos().x() ? true : false;
     mouse_position_ = event->pos();
 
+    int step = (end_idx_ - start_idx_) / MOUSE_MOVE_SPEED;
     if (m_is_mouse_left_btn_hold) {
-        //move window
         if (move_right) {
-            if (end_idx_ < m_indi_date->data.size()-1) {
-                end_idx_+=1;
-                start_idx_+=1;
-                cur_idx_+=1;
+            const int MAX_IDX = (int) m_indi_date->data.size() - 1;
+            step = CLAMP(step, 1, MAX_IDX - end_idx_);
+            if (end_idx_ < MAX_IDX) {
+                end_idx_+=step;
+                start_idx_+=step;
+                cur_idx_+=step;
             }
         } else {
+            step = CLAMP(step, 1, start_idx_);
             if (start_idx_ > 0) {
-                end_idx_-=1;
-                start_idx_-=1;
-                cur_idx_-=1;
+                end_idx_-=step;
+                start_idx_-=step;
+                cur_idx_-=step;
             }
         }
         update();
@@ -832,9 +838,9 @@ bool QFigure::is_mouse_inside_figure(void)
 void QFigure::wheelEvent(QWheelEvent *event)
 {
     //printf("QFigure deita:%d\n", event->delta());
-    if (event->delta() > 0) {
+    if (event->angleDelta().y() > 0) {
         update_index(0.8f);
-    } else if (event->delta() < 0) {
+    } else if (event->angleDelta().y() < 0) {
         update_index(1.3f);
     }
     event->accept();

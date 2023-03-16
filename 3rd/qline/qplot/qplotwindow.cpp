@@ -1,7 +1,7 @@
-﻿#include "qdef.h"
-
-#include "qplotwindow.h"
+﻿#include "qplotwindow.h"
 #include "ui_qplotwindow.h"
+
+#include "qdef.h"
 #include "qfigure.h"
 #include "qvolume.h"
 
@@ -14,7 +14,7 @@ QPlotWindow::QPlotWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle(tr("QPlot"));
-    resize(1200,800);
+    resize(1920,1080);
 }
 
 QPlotWindow::~QPlotWindow()
@@ -65,6 +65,13 @@ void QPlotWindow::plot(std::vector<noise::PtrSeries> &seriess)
     }
     QSplitter *main_splitter = new QSplitter(Qt::Vertical, 0);
     main_splitter->setHandleWidth(1);
+
+    if (dates->extra.info != nullptr) {
+        QString title = QString("%1 %2")
+            .arg(QString::fromStdString(dates->extra.info->code))
+            .arg(QString::fromStdString(dates->extra.info->basic.name));
+        setWindowTitle(title);
+    }
 
     {
         auto figure = new QFigure(this);

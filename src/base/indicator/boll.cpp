@@ -45,18 +45,24 @@ void Boll::init(void)
 
 void Boll::next(const struct noise::bar &bar)
 {
-    LOGW("TODO:");
+    if (preload_done_) {
+        return;
+    }
+    assert(series_high_.get() != nullptr);
+    assert(series_mid_.get()  != nullptr);
+    assert(series_low_.get()  != nullptr);
+    assert(series_ref_.get()  != nullptr);
+    noise::uta::boll_s(series_high_->data, series_mid_->data, series_low_->data, series_ref_->data, period_, 2.0f);
 }
 
 float Boll::get_by_index(int idx)
 {
-    // assert(data_.get() != nullptr);
-    // if (idx < 0 || idx >= series_->data.size() ) {
-    //     LOGW("invalid index{}", idx);
-    //     return NAN;
-    // }
-    // return series_->data[idx];
-    return 0;
+    assert(series_mid_.get() != nullptr);
+    if (idx < 0 || idx >= series_mid_->data.size() ) {
+        LOGW("invalid index{}", idx);
+        return NAN;
+    }
+    return series_mid_->data[idx];
 }
 
 float Boll::get(int pos)
@@ -70,8 +76,7 @@ void Boll::update_with_preload(void)
     assert(series_mid_.get() != nullptr);
     assert(series_low_.get() != nullptr);
     assert(series_ref_.get() != nullptr);
-    //LOGI("{} {}", __FUNCTION__, name_);
-    noise::utalib::boll(series_high_->data, series_mid_->data, series_low_->data, series_ref_->data, period_, 2.0f);
+    noise::uta::boll(series_high_->data, series_mid_->data, series_low_->data, series_ref_->data, period_, 2.0f);
 
 }
 

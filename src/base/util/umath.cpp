@@ -7,7 +7,7 @@
 
 namespace noise {
 
-int umath::sum(const std::vector<int> &values)
+int umath::sum(const VecI &values)
 {
     int sum = 0;
     if (values.size() <= 0) { return 0; }
@@ -17,13 +17,13 @@ int umath::sum(const std::vector<int> &values)
     return sum;
 }
 
-float umath::mean(const std::vector<int> &values)
+float umath::mean(const VecI &values)
 {
     if (values.size() <= 0) { return 0; }
     return (float)umath::sum(values) / (float) values.size();
 }
 
-float umath::sum(const std::vector<float> &values)
+float umath::sum(const VecF &values)
 {
     float sum = 0;
     if (values.size() <= 0) { return 0; }
@@ -33,13 +33,13 @@ float umath::sum(const std::vector<float> &values)
     return sum;
 }
 
-float umath::mean(const std::vector<float> &values)
+float umath::mean(const VecF &values)
 {
     if (values.size() <= 0) { return 0; }
     return umath::sum(values) / values.size();
 }
 
-float umath::stddev(const std::vector<float> &values)
+float umath::stddev(const VecF &values)
 {
     if (values.size() <= 0) { return 0; }
     float mean = umath::mean(values);

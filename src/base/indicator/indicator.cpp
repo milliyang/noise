@@ -11,12 +11,13 @@ Indicator::Indicator(Strategy*stgy, std::string name)
     assert(stgy != nullptr);
     strategy_ = stgy;
     name_ = name;
+    preload_done_ = false;
     stgy->register_indicator(this);
 }
 
 Indicator::Indicator(void)
 {
-
+    preload_done_ = false;
 }
 
 Indicator::~Indicator(void)

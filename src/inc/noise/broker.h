@@ -23,16 +23,20 @@ public:
     ~Broker(void);
 
     void  place_a_order(struct order& order);
-    void  close_position(void);
     bool  is_in_position(void);
     float get_equity(void);
-
-    void  get_first_and_last_bars(struct bar &first, struct bar &last);
+    float get_cur_price(void);
+    int   get_position(std::string &code);
+    float get_profit(std::string &code);
 
 protected:
+    void init(const struct broker_config &cfg);
     void process(const struct bar &bar);
     void on_finish(void);
-    void init(const struct broker_config &cfg);
+
+    //for stat
+    float get_init_equity(void);
+    void  get_first_and_last_bars(struct bar &first, struct bar &last);
 
     const std::vector<struct trade>& get_trades(void);
     const std::vector<struct order>& get_orders(void);
@@ -45,23 +49,21 @@ private:
     void open_a_trade(float price, int size, const struct order& order, float cur_price);
     void close_a_trade(struct trade& trade, float price, time_t time);
     void reduce_a_trade(struct trade& trade, float price, int size, time_t time);
+    void close_position(void);
 
     void print_status(void);
 
-    //
 private:
-    std::list<struct order>     m_orders_active;
-    std::list<struct trade>     m_trades_active;
+    std::list<struct order>     active_orders_;
+    std::list<struct trade>     active_trades_;
+    std::vector<struct trade>   closed_trades_;
+    std::vector<struct order>   closed_orders_;
 
-    std::vector<struct trade>   m_trades_closed;
-    std::vector<struct order>   m_orders_closed;
-
-    Position    m_position;
+    Position    position_;
 
     struct broker_config  config_;
-
-    struct bar  m_cur_bar;
-    struct bar  m_first_bar;
+    struct bar  cur_bar_;
+    struct bar  first_bar_;
 
     friend class Backtest;
     friend class Stat;

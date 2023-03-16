@@ -6,10 +6,12 @@
 
 namespace noise {
 
+bool Strategy::plot_on_finish_ = true;            //shared between all strategy
+
 Strategy::Strategy(void)
 {
     TRACE_LINE
-    m_bar_idx = 0;
+    time_index_ = -1;
 }
 
 Strategy::~Strategy(void)
@@ -24,8 +26,7 @@ Strategy::~Strategy(void)
 
 void Strategy::next(const struct bar &bar)
 {
-    TRACE_LINE;
-    m_bar_idx++;
+    time_index_++;
 }
 
 void Strategy::init(std::shared_ptr<Broker> broker)
@@ -43,11 +44,15 @@ void Strategy::buy(int size, int type)
 
 void Strategy::buy(float precent, int type)
 {
-    //TODO:
+    int size = (int) (broker_->get_equity() * precent /  broker_->get_cur_price());
+    buy(size, type);
 }
 
 void Strategy::sell(int size, int type)
 {
+    if (size <= 0) {
+        size = broker_->get_position(code_);
+    }
     struct noise::order order;
     order.type = type;
     order.size = std::abs(size) * -1;
@@ -57,6 +62,7 @@ void Strategy::sell(int size, int type)
 void Strategy::sell(float precent, int type)
 {
     //TODO:
+    //int size = broker_->get_equity() /  broker_->get_cur_price() * precent;
 }
 
 void Strategy::send_order(struct order& order)
@@ -69,10 +75,15 @@ void Strategy::send_order(struct order& order)
     }
 }
 
+float Strategy::get_profit(void)
+{
+    return broker_->get_profit(code_);
+}
+
 void Strategy::plot(void)
 {
-    if (m_ctx.data.get() != nullptr) {
-        m_ctx.data->plot();
+    if (context_.data.get() != nullptr) {
+        context_.data->plot();
     }
     return;
 }
@@ -81,8 +92,8 @@ void Strategy::register_indicator(PtrIndicator ptr)
 {
     assert(ptr->name().length() > 0);
 
-    ptr->setup(m_ctx.data);
-    m_ctx.data->push_indicator(ptr->name(), ptr);
+    ptr->setup(context_.data);
+    context_.data->push_indicator(ptr->name(), ptr);
     indicators_.push_back(ptr);
 }
 

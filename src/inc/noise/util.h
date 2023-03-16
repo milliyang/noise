@@ -7,6 +7,13 @@ namespace noise
 
 namespace util {
     void parse_csv_bars_file(std::vector<struct bar> &v_bars, const std::string &filepath);
+    //
+    void parse_code_file(std::vector<struct code_info> &codes, const std::string &filepath);
+    void parse_ini_code_file(std::vector<struct code_info> &codes, const std::string &filepath);
+    void parse_csv_code_file(std::vector<struct code_info> &codes, const std::string &filepath);
+
+    std::string get_filename_with_extension(const std::string& filepath);
+    std::string get_filename_without_extension(const std::string& filepath);
 }
 
 namespace uprint {
@@ -17,16 +24,17 @@ namespace uprint {
     void print(const char*tag, const std::list<struct trade> &trades);
     void print(const char*tag, const std::vector<struct trade> &trades);
     void print(const char*tag, const std::vector<std::string> &strings);
-    void print(const char*tag, const std::vector<float> &prices);
+    void print(const char*tag, const VecF &prices);
+    void print(const char *tag, const struct code_info &info);
 
     void print(const char*tag, time_t time);
     void print_time(const char*tag, time_t time);
 }
 
 namespace umath {
-    float sum(const std::vector<float> &values);
-    float mean(const std::vector<float> &values);
-    float stddev(const std::vector<float> &values);
+    float sum(const VecF &values);
+    float mean(const VecF &values);
+    float stddev(const VecF &values);
 
     //don't use template
     int sum(const std::vector<int> &values);
@@ -46,15 +54,30 @@ namespace utime {
     std::string fmt_time_long(time_t time);  //YYYY-MM-DD HH:mm:ss
 }
 
-namespace utalib {
-    void ma(std::vector<float> &ma_values,          const std::vector<float> &values, int period);
-    void ma2(std::vector<float> &ma_values,         const std::vector<float> &values, int period);
-    void max(std::vector<float> &max_values,        const std::vector<float> &values, int period);
-    void stddev(std::vector<float> &stddev_values,  const std::vector<float> &values, int period, bool divided_by_mean = false); /*stddev.p*/
+namespace uta {
+    void ma(VecF &ma_values,          const VecF &values, int period);
+    void max(VecF &max_values,        const VecF &values, int period);
+    void stddev(VecF &stddev_values,  const VecF &values, int period, bool divided_by_mean = false); /*stddev.p*/
 
-    void boll(std::vector<float> &high, std::vector<float> &mid, std::vector<float> &low,
-                const std::vector<float> &values, int period,
+    void boll(VecF &high, VecF &mid, VecF &low,
+                const VecF &values, int period,
                 float ratio);
+
+    //slow & support resume
+    void ma_s(VecF &ma_values,          const VecF &values, int period);
+    void max_s(VecF &max_values,        const VecF &values, int period);
+    void stddev_s(VecF &stddev_values,  const VecF &values, int period, bool divided_by_mean = false);
+    void boll_s(VecF &high, VecF &mid, VecF &low,
+                const VecF &values, int period,
+                float ratio);
+}
+
+struct args0;
+using PtrArgs = std::shared_ptr<struct args0>;
+
+namespace uargs {
+    int     args0_parse(const char *title, int32_t argc, char** argv);
+    PtrArgs args0_get(void);
 }
 
 class Timelapsed {

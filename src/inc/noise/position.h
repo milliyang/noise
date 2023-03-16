@@ -10,6 +10,7 @@ class Broker;
 struct code_position {
     int share;
     float price;
+    float cost_price;       //init and cost average price
 };
 
 class Position {
@@ -21,6 +22,8 @@ public:
     void  set_cash(float cash = 100000.0f);
     float get_cash(void);
     float equity(void);    // cash + stock
+    int   get_size(std::string &code);
+    float get_profit(std::string &code);
 
 protected:
     void withdraw(float money);
@@ -30,8 +33,8 @@ protected:
     void update(std::string code, int share, float cur_price);
 
 private:
-    float m_cash;
-    std::map<std::string, struct code_position> m_position;
+    float cash_;
+    std::map<std::string, struct code_position> position_map_;
 
     friend class Broker;
 };

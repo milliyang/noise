@@ -37,7 +37,7 @@ void VolumeGrid::initial()
 
     //初始化一些成员变量值
 
-    endDay = mDataFile.kline.size() - 1;
+    endDay = (int) mDataFile.kline.size() - 1;
     totalDay = 200;
     beginDay  = endDay - totalDay;
     currentDay = beginDay + totalDay /2;

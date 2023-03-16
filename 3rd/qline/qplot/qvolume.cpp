@@ -25,7 +25,7 @@ void QVolume::init_figure(void)
 {
     CHK_NULL_INDI(m_volume);
 
-    int num = m_volume->data.size();
+    int num = (int) m_volume->data.size();
 
     start_idx_ = cur_idx_ = 0;
     end_idx_ = num-1;
@@ -48,7 +48,10 @@ void QVolume::update_figure(void)
     if (m_volume->data.size() <= 0) {
         return;
     }
-
+    //bugfix:
+    if (start_idx_ < 0) {
+        start_idx_ = 0;
+    }
     for (int i=start_idx_; i < end_idx_; ++i) {
         auto vol = m_volume->data.at(i);
         if (isnanf(vol)) {
@@ -73,7 +76,7 @@ void QVolume::draw_y_coordinate_info(void)
     QString str;
     float x = getWidgetWidth() - getMarginRight() + DEFAULT_TIPS_GAP;
     for (int i=0; i <= getHGridNum(); ++i) {
-        str.sprintf("%0.1fK", (i*ystep) / 1000.0f );
+        str = QString("%1K").arg((i*ystep) / 1000.0f, 2, 'f', 1);
         painter.drawText(QPoint(x, getWidgetHeight() - getMarginBottom() - i*getAtomGridHeight()), str);
     }
 }
@@ -129,7 +132,7 @@ void QVolume::draw_volume_bin()
 void QVolume::update_stat(const struct figure_stat &stat)
 {
     CHK_NULL_INDI(m_volume);
-    int bar_num = m_volume->data.size();
+    int bar_num = (int) m_volume->data.size();
 
     start_idx_ = stat.start_idx;
     end_idx_ = stat.end_idx;

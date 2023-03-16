@@ -1,24 +1,25 @@
 #include "noise/noise.h"
-#include "cd.h"
 #include <random>
 
-bool test_talib_ma(void)
+using namespace noise;
+
+bool test_ta_ma_speed(void)
 {
     std::random_device rd;
     std::uniform_int_distribution<int> dist(0, 9);
-    std::vector<float> values;
+    VecF values;
     for (int i = 0; i < 1000; i++) {
         values.push_back((float)dist(rd));
     }
-    std::vector<float> ma0;
-    std::vector<float> ma1;
+    VecF ma0;
+    VecF ma1;
     {
         noise::Timelapsed time_performance("ma0");
-        noise::utalib::ma(ma0, values, 25);
+        uta::ma(ma0, values, 25);
     }
     {
         noise::Timelapsed time_performance("ma1");
-        noise::utalib::ma2(ma1, values, 25);
+        uta::ma_s(ma1, values, 25);
     }
 
     assert(ma0.size() == ma1.size());
@@ -33,9 +34,26 @@ bool test_talib_ma(void)
     return true;
 }
 
+/**
+ * compare the results: preload vs. not preload
+ *
+ * ma     vs. ma_s
+ * stddev vs. stddev_s
+ * ...
+ */
+bool test_ta_preload_version(void)
+{
+    //TODO:
+
+    LOGI("@%s [NG]\n", __FUNCTION__);
+    return true;
+}
+
+
 int32_t main(int32_t argc, char** argv)
 {
-    test_talib_ma();
+    test_ta_ma_speed();
+    test_ta_preload_version();
 
     LOGI("@%s [done]\n", __FUNCTION__);
 }

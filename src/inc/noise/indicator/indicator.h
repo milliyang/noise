@@ -46,6 +46,7 @@ protected:
     int                         time_index_; //increase every bar
     std::string                 name_;
     Strategy                    *strategy_;
+    bool                        preload_done_;
 
     friend class noise::Strategy;
     friend class Data;              //buggy

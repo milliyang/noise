@@ -4,7 +4,7 @@
 
 namespace noise {
 
-void utalib::ma2(std::vector<float> &ma_values, const std::vector<float> &values, int period)
+void uta::ma_s(VecF &ma_values, const VecF &values, int period)
 {
     assert(period > 0);
     if (values.size() == 0) {
@@ -27,37 +27,7 @@ void utalib::ma2(std::vector<float> &ma_values, const std::vector<float> &values
     }
 }
 
-void utalib::ma(std::vector<float> &ma_values, const std::vector<float> &values, int period)
-{
-    assert(period > 0);
-    if (values.size() == 0) {
-        return;
-    }
-    assert(ma_values.size() == 0);
-
-    const int MOD = period + 1;
-    std::vector<float> fifo;
-    fifo.reserve(MOD);
-
-    float sum = 0;
-    int idx = 0;
-    for (int i = 0; i < MOD; i++) {
-        fifo.push_back(0.0f);
-    }
-    for (const auto it: values) {
-        fifo[idx% MOD] = it;    //push
-        idx++;                  //advance
-        sum += it;
-        sum -= fifo[idx % MOD]; //pop
-        ma_values.push_back(sum/period);
-    }
-
-    for (int i = 0; i < (period-1); i++) {
-        ma_values[i] = NAN;
-    }
-}
-
-void utalib::max(std::vector<float> &max_values, const std::vector<float> &values, int period)
+void uta::max_s(VecF &max_values, const VecF &values, int period)
 {
     assert(period > 0);
     if (values.size() == 0) {
@@ -81,15 +51,15 @@ void utalib::max(std::vector<float> &max_values, const std::vector<float> &value
 }
 
 /* A = sum( (v - mean)^2 ) / n;  result=sqrt(A) */
-void utalib::stddev(std::vector<float> &stddev_values, const std::vector<float> &values, int period, bool divided_by_mean)
+void uta::stddev_s(VecF &stddev_values, const VecF &values, int period, bool divided_by_mean)
 {
     assert(period > 0);
     if (values.size() == 0) {
         return;
     }
 
-    std::vector<float> means;
-    utalib::ma(means, values, period);
+    VecF means;
+    uta::ma(means, values, period);
 
     int idx_resume = (int)stddev_values.size();  //resume from this idx
     for (; idx_resume < (int)values.size(); idx_resume++) {
@@ -119,8 +89,8 @@ void utalib::stddev(std::vector<float> &stddev_values, const std::vector<float> 
  *  UPPER=MID + TIMES*STD(CLOSE,PERIOD)
  *  LOWER=MID - TIMES*STD(CLOSE,PERIOD)
  */
-void utalib::boll(std::vector<float> &high, std::vector<float> &mid, std::vector<float> &low,
-                const std::vector<float> &values, int period,
+void uta::boll_s(VecF &high, VecF &mid, VecF &low,
+                const VecF &values, int period,
                 float ratio)
 {
     if (values.size() == 0) {
@@ -131,10 +101,10 @@ void utalib::boll(std::vector<float> &high, std::vector<float> &mid, std::vector
     assert(low.size() == mid.size());
     if (ratio <= 0) {ratio = 1.0f;}
 
-    std::vector<float> means;
-    std::vector<float> stddev;
-    utalib::ma(means, values, period);
-    utalib::stddev(stddev, values, period);
+    VecF means;
+    VecF stddev;
+    uta::ma(means, values, period);
+    uta::stddev(stddev, values, period);
 
     int idx_resume = (int)high.size();  //resume from this idx
     for (; idx_resume < (int)values.size(); idx_resume++) {

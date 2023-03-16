@@ -23,11 +23,13 @@ add_compile_options("/utf-8")                              #fuck msvc
 #     file(GLOB LIB_SOURCES "${CMAKE_SOURCE_DIR}/*.cpp")
 file(GLOB LIB_SOURCES "../src/*.cpp" "../src/*.h" "*.cpp" "*.h" "*.ui")
 
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
 include_directories("../src")
 
 # noise dir:
-include_directories("${NOISE_INC}")
-include_directories("${NOISE_DIR}")
+# include_directories("${NOISE_INC}")
+# include_directories("${NOISE_DIR}")
 
 # ┌──────────────────────────────────────────────────────────────────┐
 # │  UI,RCC file                                                     │

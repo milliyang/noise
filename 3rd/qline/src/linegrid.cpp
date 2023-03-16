@@ -44,13 +44,13 @@ void LineGrid::initial()
     setMouseTracking(true);
     //初始化一些成员变量
 
-    endDay = mDataFile.kline.size() - 1;
+    endDay = (int)mDataFile.kline.size() - 1;
     totalDay = 200;
     beginDay  = endDay - totalDay;
     currentDay = beginDay + totalDay /2;
     if( beginDay < 0) {
         beginDay = 0;
-        totalDay = mDataFile.kline.size();
+        totalDay = (int) mDataFile.kline.size();
     }
     highestBid = 0;
     lowestBid = 1000;
@@ -367,8 +367,8 @@ void LineGrid::keyPressEvent(QKeyEvent *event)
         endDay = currentDay + totalDay/2;
         beginDay = currentDay - totalDay/2;
 
-        if( endDay > mDataFile.kline.size() -10) {
-            endDay = mDataFile.kline.size() -10;
+        if( endDay > (int) mDataFile.kline.size() -10) {
+            endDay = (int) mDataFile.kline.size() -10;
             beginDay = endDay - totalDay;
         }
 
@@ -389,13 +389,13 @@ void LineGrid::keyPressEvent(QKeyEvent *event)
 
         totalDay = totalDay * 2;
         if( totalDay > mDataFile.kline.size() -1) {
-            totalDay = mDataFile.kline.size() -1;
+            totalDay = (int)mDataFile.kline.size() -1;
         }
 
 
         endDay = currentDay + totalDay/2;
-        if( endDay > mDataFile.kline.size() -10) {
-            endDay = mDataFile.kline.size() -10;
+        if( endDay > (int) mDataFile.kline.size() -10) {
+            endDay = (int) mDataFile.kline.size() -10;
         }
 
 

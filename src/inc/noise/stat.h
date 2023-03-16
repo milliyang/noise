@@ -21,6 +21,7 @@ protected:
     void init(std::shared_ptr<Broker> broker, std::shared_ptr<Data> data);
     void on_trade_day(void);
     void on_finish(void);
+    const struct stat& get_stat(void);
 
 private:
     void calc_stat(void);
@@ -31,7 +32,7 @@ private:
     std::shared_ptr<Broker> broker_;
     std::shared_ptr<Data> data_;
     PtrSeries equity_series_;
-    struct stat m_stat;
+    struct stat status_;
 
     friend class Backtest;
 };

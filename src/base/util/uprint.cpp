@@ -65,7 +65,7 @@ void uprint::print(const char*tag, const std::vector<struct trade> &trades)
     }
 }
 
-void uprint::print(const char*tag, const std::vector<float> &values)
+void uprint::print(const char*tag, const VecF &values)
 {
     for (auto it = values.begin(); it != values.end(); ++it) {
         LOGD("[{}] {}", tag, *it);
@@ -89,6 +89,21 @@ void uprint::print(const char *tag, const struct order &order)
         order.size,
         order.price,
         order.type);
+}
+
+void uprint::print(const char *tag, const struct code_info &info)
+{
+    DEBUG_OFF
+    LOGD("[{}] {} {} {} {} {} {} {} {}",
+        tag,
+        info.seq      ,
+        info.code     ,
+        info.symbol   ,
+        info.name     ,
+        info.area     ,
+        info.industry ,
+        info.market   ,
+        info.list_date);
 }
 
 void uprint::print(const char *tag, const struct bar &bar)
@@ -136,7 +151,7 @@ void uprint::print(const char *tag, const struct stat &stat)
     LOGI("  PNL                              [$] {:+11.2f}",         stat.PNL);
     LOGI("  Return                           [%]     {:7.2f}",       stat.return_final * PERCENT);
     LOGI("  Buy & Hold Return                [%]     {:7.2f}",       stat.return_buy_and_hold * PERCENT);
-    LOGI("  Return (Ann.)                    [%]     {:7.2f} TBD",   stat.return_annual * PERCENT);
+    LOGI("  Return     (Ann.)                [%]     {:7.2f} TBD",   stat.return_annual * PERCENT);
     LOGI("  Volatility (Ann.)                [%]     {:7.2f} TBD",   stat.volatility_annual * PERCENT);
     LOGI("  Sharpe Ratio                             {:7.2f} TBD",   stat.sharpe_ratio);
     //printf(" Sortino Ratio                             {:7.2f}", stat.sortino_ratip);
@@ -148,16 +163,25 @@ void uprint::print(const char *tag, const struct stat &stat)
     LOGI("  ******");
     LOGI("  Trades                                    {:6d}",        stat.trade_cnt);
     LOGI("  Win Rate                         [%]     {:7.2f}",       stat.win_ratio   * PERCENT);
-    LOGI("  Avg. Trade                       [%]     {:7.2f}",       stat.avg_trade   * PERCENT);
+    LOGI("  Avg.  Trade                      [%]     {:7.2f}",       stat.avg_trade   * PERCENT);
     LOGI("  Best. Trade                      [%]     {:7.2f}",       stat.best_trade  * PERCENT);
     LOGI("  Wors. Trade                      [%]     {:7.2f}",       stat.worst_trade * PERCENT);
     LOGI("  Best. Trade on PNL               [$]  {:+10.2f}",        stat.best_trade_on_PNL);
     LOGI("  Wors. Trade on PNL               [$]  {:+10.2f}",        stat.worst_trade_on_PNL);
-    LOGI("  Max. Trade Duration           [days]    {:8.2f}",        stat.max_trade_duration);
-    LOGI("  Avg. Trade Duration           [days]    {:8.2f}",        stat.avg_trade_duration);
+    LOGI("  Max.  Trade Duration          [days]    {:8.2f}",        stat.max_trade_duration);
+    LOGI("  Avg.  Trade Duration          [days]    {:8.2f}",        stat.avg_trade_duration);
     //printf(" Profit Factor                       [%] {:7.2f}", stat.profit_factor);
     //printf(" Expectancy                            {:7.2f}", stat.expectancy);
     LOGI("  SQN                                      {:7.2f}",       stat.SQN);
+
+    //For grep
+    LOGD("[grep] Return:{:7.2f}% B&H Return:{:7.2f}% SQN:{:7.2f} Trades:{:4d} Win Rate:{:7.2f}% PNL:{:+11.2f}$",
+        stat.return_final * PERCENT,
+        stat.return_buy_and_hold * PERCENT,
+        stat.SQN,
+        stat.trade_cnt,
+        stat.win_ratio * PERCENT,
+        stat.PNL);
 }
 
 void uprint::print(const char *tag, time_t time)
