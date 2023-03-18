@@ -1,3 +1,5 @@
+#define LOG_TAG "broker"
+
 #include "noise/noise.h"
 #include "noise/broker.h"
 
@@ -34,8 +36,7 @@ void Broker::init(const struct broker_config &cfg)
  */
 void Broker::process(const struct bar &bar)
 {
-    uprint::print("new   bar", bar);
-
+    //uprint::print("new   bar", bar);
     if (first_bar_.time == 0) {
         first_bar_ = bar;
     };

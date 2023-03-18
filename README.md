@@ -87,9 +87,9 @@ Build on Windows with GUI Ploting
 ```sh
     cd noise
     mkdir build && cd build
-    cmake ../sample/cd
+    cmake ../sample
     MSBuild.exe noise.sln           # require VisualStudio
-    .\Debug\bt.exe
+    .\Debug\cd.exe
 ```
 ![output_image](https://bg-so-1.zippyimage.com/2023/03/12/4f0a4a172cc3761cf68bee597bb7612d.png)
 

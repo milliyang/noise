@@ -1,3 +1,5 @@
+#define LOG_TAG "strategy"
+
 #include "noise/def.h"
 
 #include "noise/def.h"

@@ -1,3 +1,5 @@
+#define LOG_TAG "uprint"
+
 #include "noise/def.h"
 #include "noise/strategy.h"
 #include "noise/broker.h"

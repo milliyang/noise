@@ -1,3 +1,5 @@
+#define LOG_TAG "position"
+
 #include "noise/def.h"
 #include "noise/position.h"
 #include "noise/log.h"
@@ -101,9 +103,9 @@ float Position::equity(void)
             //LOGI("money Share:{}, price:{}, worth:{}", iter->second.price, iter->second.share, std::abs(iter->second.price * iter->second.share));
         }
     }
-    if (stock_cash > 0) {
-        LOGD("money cash:{}, stock:{} total:{}", cash_, stock_cash, cash_ + stock_cash);
-    }
+    // if (stock_cash > 0) {
+    //     LOGD("money cash:{}, stock:{} total:{}", cash_, stock_cash, cash_ + stock_cash);
+    // }
     return cash_ + stock_cash;
 }
 

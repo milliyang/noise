@@ -55,7 +55,6 @@ void Stddev::next(const struct noise::bar &bar)
 
     assert(series_.get() != nullptr);
     assert(series_ref_.get() != nullptr);
-    LOGI("stddev {} {}",  series_->data.size(), series_ref_->data.size());
     noise::uta::stddev(series_->data, series_ref_->data, period_, divided_by_unit_);
 }
 

@@ -1,3 +1,5 @@
+#define LOG_TAG "show"
+
 #include "noise/noise.h"
 #include "noise/indicator/ta.h"
 #include "noise/util.h"
@@ -158,7 +160,7 @@ int32_t main(int32_t argc, char** argv)
         return 0;
     }
 
-    LOGI(fmt::format("{}", "Backtest run..."));
+    LOGI("Backtest run...");
     noise::Timelapsed time_performance(__FUNCTION__);
     noise::Backtest bt([](){
         return std::make_shared<StrategyShow>();

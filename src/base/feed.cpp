@@ -1,3 +1,5 @@
+#define LOG_TAG "feed "
+
 #include "noise/def.h"
 #include "noise/feed.h"
 #include "noise/util.h"
@@ -44,8 +46,12 @@ void FeedCSV::load_bars(void)
 
 bool FeedCSV::is_support_preload(void)
 {
-    //return true;
+#if 1
+    //faster and data processing
+    return true;
+#else
     return false;
+#endif
 }
 
 std::vector<struct bar>& FeedCSV::get_bars(void)
@@ -71,7 +77,6 @@ void FeedCSV::init(const struct feed_config &cfg)
 
 bool FeedCSV::next(struct bar &bar)
 {
-    LOGD("{} {}", index_, bars_.size());
     //if (index_ >= 10) return false; //debug
     if (index_ >= bars_.size()) {
         return false;

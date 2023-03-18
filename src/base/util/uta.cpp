@@ -13,6 +13,17 @@ void uta::ma(VecF &ma_values, const VecF &values, int period)
     }
     assert(ma_values.size() == 0);
 
+    ma_values.clear();
+    ma_values.resize(values.size());
+
+    //bugfix special case
+    if (values.size() < period) {
+        for (int i = 0; i < (period-1); i++) {
+            ma_values[i] = NAN;
+        }
+        return;
+    }
+
     const int MOD = period + 1;
     VecF fifo;
     fifo.reserve(MOD);
@@ -27,12 +38,7 @@ void uta::ma(VecF &ma_values, const VecF &values, int period)
         idx++;                  //advance
         sum += it;
         sum -= fifo[idx % MOD]; //pop
-        ma_values.push_back(sum/period);
-    }
-
-    //bugfix special case
-    if (ma_values.size() < period) {
-        period = (int) ma_values.size() + 1;
+        ma_values[idx-1] = (sum/period);
     }
 
     for (int i = 0; i < (period-1); i++) {
@@ -42,35 +48,21 @@ void uta::ma(VecF &ma_values, const VecF &values, int period)
 
 void uta::max(VecF &max_values, const VecF &values, int period)
 {
-    assert(period > 0);
-    if (values.size() == 0) {
-        return;
-    }
-
-    int idx_resume = (int)max_values.size();  //resume from this idx
-    for (; idx_resume < (int)values.size(); idx_resume++) {
-        float sum = 0;
-        for (int idx = idx_resume-period+1; idx <= idx_resume; idx++) {
-            if (idx < 0) {
-                sum = 0;
-            } else {
-                if (sum < values.at(idx)) {
-                    sum = values.at(idx);
-                }
-            }
-        }
-        max_values.push_back(sum);
-    }
+    //TODO:
+    // need fast version
+    max_s(max_values, values, period);
 }
 
-/* A = sum( (v - mean)^2 ) / n;  result=sqrt(A) */
+/**
+ * Version0:
+ *  A = sum( (v - mean)^2 ) / n;  result=sqrt(A)
+ *
+ * Version1:
+ *  A = sum( (v - mean)^2 ) / n-1;  result=sqrt(A)     <--------- using, and the same as armadillo
+ *
+ */
 void uta::stddev(VecF &stddev_values, const VecF &values, int period, bool divided_by_mean)
 {
-    assert(period > 0);
-    if (values.size() == 0) {
-        return;
-    }
-
     //TODO:
     // need fast version
     stddev_s(stddev_values, values, period, divided_by_mean);

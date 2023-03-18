@@ -6,14 +6,18 @@
   #include "spdlog/spdlog.h"
   #include "spdlog/fmt/fmt.h"
 
+  #ifndef LOG_TAG
+    #define LOG_TAG "none"
+  #endif
+
   //file:
-  #define LOGT    SPDLOG_TRACE
-  #define LOGD    SPDLOG_DEBUG
+  #define LOGT(...)    SPDLOG_TRACE("[" LOG_TAG "] " ##__VA_ARGS__)
+  #define LOGD(...)    SPDLOG_DEBUG("[" LOG_TAG "] " ##__VA_ARGS__)
   //terminal:
-  #define LOGI    SPDLOG_INFO
-  #define LOGE    SPDLOG_ERROR
-  #define LOGW    SPDLOG_WARN
-  #define LOGC    SPDLOG_CRITICAL
+  #define LOGI(...)    SPDLOG_INFO("[" LOG_TAG "] " ##__VA_ARGS__)
+  #define LOGE(...)    SPDLOG_ERROR("[" LOG_TAG "] " ##__VA_ARGS__)
+  #define LOGW(...)    SPDLOG_WARN("[" LOG_TAG "] " ##__VA_ARGS__)
+  #define LOGC(...)    SPDLOG_CRITICAL("[" LOG_TAG "] " ##__VA_ARGS__)
 #else
   #include "spdlog/fmt/fmt.h"
   #if 1
@@ -36,3 +40,4 @@
 void log_init(void);
 void log_deinit(void);
 
+void log_backtrace(void);

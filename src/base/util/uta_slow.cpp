@@ -48,15 +48,28 @@ void uta::max_s(VecF &max_values, const VecF &values, int period)
         }
         max_values.push_back(sum);
     }
+
+    for (int i = 0; i < (period-1); i++) {
+        max_values[i] = NAN;
+    }
 }
 
-/* A = sum( (v - mean)^2 ) / n;  result=sqrt(A) */
+/**
+ * Version0:
+ *  A = sum( (v - mean)^2 ) / n;  result=sqrt(A)
+ *
+ * Version1:
+ *  A = sum( (v - mean)^2 ) / n-1;  result=sqrt(A)     <--------- using, and the same as armadillo
+ *
+ */
 void uta::stddev_s(VecF &stddev_values, const VecF &values, int period, bool divided_by_mean)
 {
     assert(period > 0);
     if (values.size() == 0) {
         return;
     }
+
+    const float N = (float) (period - 1);   // Version1
 
     VecF means;
     uta::ma(means, values, period);
@@ -72,13 +85,17 @@ void uta::stddev_s(VecF &stddev_values, const VecF &values, int period, bool div
                 sum += powf(v,2);
             }
         }
-        sum = std::sqrt(sum / period);
+        sum = std::sqrt(sum / N);   // TODO: this should be moved to SIMD
 
         if (divided_by_mean) {
             stddev_values.push_back(sum/means.at(idx_resume));
         } else {
             stddev_values.push_back(sum);
         }
+    }
+
+    for (int i = 0; i < (period-1); i++) {
+        stddev_values[i] = NAN;
     }
 }
 

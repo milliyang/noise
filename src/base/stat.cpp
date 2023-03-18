@@ -1,3 +1,5 @@
+#define LOG_TAG "stat"
+
 #include "noise/def.h"
 #include "noise/noise.h"
 #include "noise/stat.h"

@@ -1,3 +1,5 @@
+#define LOG_TAG "backtest"
+
 #include "noise/def.h"
 #include "noise/backtest.h"
 #include "noise/broker.h"
@@ -76,7 +78,6 @@ void Backtest::run_strategy(const struct BtContext &ctx)
 
     ctx.strategy->on_bar_start();
     while(ctx.feed->next(bar)) {
-        LOGD("{}", bar.date);
         ctx.data->update_data_series(bar);
         ctx.broker->process(bar);
         ctx.strategy->next(bar);
@@ -157,6 +158,7 @@ void Backtest::run()
             status.best_trade_on_PNL  = std::max(status.best_trade_on_PNL, st.best_trade_on_PNL);
             status.worst_trade_on_PNL = std::min(status.worst_trade_on_PNL, st.worst_trade_on_PNL);
             status.equity_peak        = std::max(status.equity_peak, st.equity_peak);
+            status.extra.code_cnt++;
         }
 
         status.equity_final /= (float) context_vector_.size();

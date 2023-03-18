@@ -1,3 +1,5 @@
+#define LOG_TAG "uargs"
+
 #include "noise/def.h"
 #include "noise/util.h"
 #include "3rd/args.hxx"
@@ -14,7 +16,7 @@ const static char *args0_usage = "\n"                                   \
 "    >./bt -c xxx/000026.SZ.csv     //bar file                     \n"  \
 "    >./bt -m 100000.0              //init equity                  \n"  \
 "    >./bt -f .code.csv             //codes                        \n"  \
-"    >./bt -f .code.csv -n200 -k10  //codes.skip(10).head(200)     \n"  \
+"    >./bt -f .code.csv -k10 -n200  //codes.skip(10).head(200)     \n"  \
 ";\n"                                                              \
 ;
 
@@ -43,7 +45,7 @@ int uargs::args0_parse(const char *title, int32_t argc, char** argv)
     args::ValueFlag<std::string>    cash(parser,          "float",     "init cash money",               {'m',  ARGS_INIT_CASH});
     args::ValueFlag<std::string>    date(parser,          "date ",     "begin date 20230101",           {'d',  ARGS_BEGIN_DATE});
     args::ValueFlag<std::string>    codefile(parser,      "file ",     "codes in file",                 {'f',  ARGS_CODE_FILE});
-    args::ValueFlag<std::string>    num(parser,           "num  ",     "codes.head(num)",               {'n',  ARGS_NUM});
+    args::ValueFlag<std::string>    num(parser,           " num ",     "codes.head(num)",               {'n',  ARGS_NUM});
     args::ValueFlag<std::string>    skip(parser,          "skip ",     "codes.skip(num)",               {'k',  ARGS_SKIP});
     args::Positional<std::string>   image_input(parser,   "image",     "input image");
 

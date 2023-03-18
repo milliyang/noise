@@ -1,3 +1,5 @@
+#define LOG_TAG "mcache"
+
 #include "noise/def.h"
 #include "noise/noise.h"
 #include "noise/util.h"

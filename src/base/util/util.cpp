@@ -1,3 +1,5 @@
+#define LOG_TAG "utils"
+
 #include "noise/def.h"
 #include "noise/strategy.h"
 #include "noise/broker.h"
@@ -244,6 +246,17 @@ std::string util::get_filename_without_extension(const std::string& filepath)
     }
     return"";
 }
+
+
+Timelapsed::Timelapsed(std::string tag) {start = std::chrono::high_resolution_clock::now(); a_tag=tag;}
+
+Timelapsed::~Timelapsed(void) {
+    auto nano = std::chrono::high_resolution_clock::now() - start;
+    //auto us = std::chrono::duration_cast<std::chrono::microseconds>(nano).count();
+    //auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(nano).count();
+    //printf("time elapsed: %d(us)  %d(nano sec)\n", (int)us, (int)ns);
+    LOGI("time elapsed: {} ms   [{}] ", nano.count() / (1000.0f * 1000.0f), a_tag.c_str());
+};
 
 
 }

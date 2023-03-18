@@ -178,6 +178,7 @@ struct stat {
 
     struct {
         int win_trade_cnt;
+        int code_cnt;
     } extra;
 };
 

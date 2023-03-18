@@ -82,14 +82,8 @@ namespace uargs {
 
 class Timelapsed {
 public:
-    Timelapsed(std::string tag) { start = std::chrono::high_resolution_clock::now(); a_tag=tag;}
-    ~Timelapsed(void) {
-        auto nano = std::chrono::high_resolution_clock::now() - start;
-        //auto us = std::chrono::duration_cast<std::chrono::microseconds>(nano).count();
-        //auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(nano).count();
-        //printf("time elapsed: %d(us)  %d(nano sec)\n", (int)us, (int)ns);
-        printf("[%s] time elapsed: %f ms\n", a_tag.c_str(), nano.count() / (1000.0f * 1000.0f));
-    };
+    Timelapsed(std::string tag);
+    ~Timelapsed(void);
     //std::chrono::time_point<std::chrono::system_clock> start;
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
     std::string a_tag;

@@ -56,4 +56,73 @@ arma::frowvec uarma::get_closes(std::vector<struct bar> &bars)
     return closes;
 }
 
+/* Fucking slow, but logic clear */
+arma::frowvec uarma::ma(const arma::frowvec &src, int win)
+{
+#if 1
+    arma::frowvec out = arma::frowvec(src.n_cols);
+    const int IDX_NAN = win-1;
+    for (int i = IDX_NAN; i < src.n_cols; i++) {
+        int start = i-win+1;
+        start = std::max(start, 0);
+        arma::frowvec slice = src.cols(start, i);
+        //assert(slice.n_cols == win);
+        out.at(i) = arma::mean(slice);
+    }
+    for (int i = 0; i < IDX_NAN; i++) {
+        out.at(i) = NAN;
+    }
+    return std::move(out);
+#else
+    return arma::mean(src, win);    // not working, API not this way
+#endif
+}
+
+/* Fucking slow, but logic clear */
+arma::frowvec uarma::max(const arma::frowvec &src, int win)
+{
+    arma::frowvec out = arma::frowvec(src.n_cols);
+    const int IDX_NAN = win - 1;
+    for (int i = IDX_NAN; i < src.n_cols; i++) {
+        int start = i - win + 1;
+        start = std::max(start, 0);
+        arma::frowvec slice = src.cols(start, i);
+        //assert(slice.n_cols == win);
+        out.at(i) = arma::max(slice);
+    }
+    for (int i = 0; i < IDX_NAN; i++) {
+        out.at(i) = NAN;
+    }
+    return std::move(out);
+}
+
+/**
+ * - Fucking not slow and logic clear
+ *   why?
+ */
+arma::frowvec uarma::stddev(const arma::frowvec &src, int win)
+{
+    arma::frowvec out = arma::frowvec(src.n_cols);
+    const int IDX_NAN = win - 1;
+    for (int i = IDX_NAN; i < src.n_cols; i++) {
+        int start = i - win + 1;
+        start = std::max(start, 0);
+        arma::frowvec slice = src.cols(start, i);
+        //assert(slice.n_cols == win);
+        out.at(i) = arma::stddev(slice);
+    }
+    for (int i = 0; i < IDX_NAN; i++) {
+        out.at(i) = NAN;
+    }
+    return std::move(out);
+}
+
+void uarma::boll(const arma::frowvec &src, int win,
+                    arma::frowvec &high,
+                    arma::frowvec &mid,
+                    arma::frowvec &low)
+{
+
+}
+
 }

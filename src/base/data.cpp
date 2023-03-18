@@ -1,3 +1,5 @@
+#define LOG_TAG "data"
+
 #include "noise/noise.h"
 
 namespace noise {
