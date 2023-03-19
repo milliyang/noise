@@ -268,7 +268,7 @@ void Stat::calc_stat(void)
     status_.avg_trade_duration = (float) utime::get_duration((time_t)status_.avg_trade_duration);
     status_.max_trade_duration = (float) utime::get_duration((time_t)status_.max_trade_duration);
 
-    //
+    // https://tradingtact.com/system-quality-number/
     status_.SQN = sqrtf((float)trades.size()) * umath::mean(vec_pnl) / umath::stddev(vec_pnl);
     //s.loc['SQN'] = np.sqrt(n_trades) * pl.mean() / (pl.std() or np.nan)
 

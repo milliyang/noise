@@ -10,6 +10,8 @@ TODO LIST (20230111)
 - select area for pattern detection                                 =>skip
 - sum total pnl & trade                                             =>done
 - support without preload  (avoid peek data ahead)                  =>done
+- unitest for preload                                               =>done
+- verify ma/stddev utest; compare to armadillo,ta-lib,              =>done
 
 - yml or ini config
 - show buy,sell check point ( special series: start,arrow,triangle,text)

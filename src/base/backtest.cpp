@@ -144,6 +144,8 @@ void Backtest::run()
         struct stat status;
         memset(&status, 0, sizeof(struct stat));
 
+        VecF vec_pnl;
+
         for (int i = 0; i < context_vector_.size(); i++) {
             auto st = context_vector_[i].stat->get_stat();
             if (i == 0) {
@@ -159,11 +161,20 @@ void Backtest::run()
             status.worst_trade_on_PNL = std::min(status.worst_trade_on_PNL, st.worst_trade_on_PNL);
             status.equity_peak        = std::max(status.equity_peak, st.equity_peak);
             status.extra.code_cnt++;
+
+            const auto broker = context_vector_[i].broker;
+
+            const auto trades = broker->get_trades();
+            for (auto it = trades.begin(); it != trades.end(); ++it) {
+                const struct trade& trade = *it;
+                vec_pnl.push_back(trade.PNL);
+            }
         }
 
         status.equity_final /= (float) context_vector_.size();
         status.win_ratio     = (float) status.extra.win_trade_cnt / (float) status.trade_cnt;
 
+        status.SQN = sqrtf((float)vec_pnl.size()) * umath::mean(vec_pnl) / umath::stddev(vec_pnl);
         uprint::print("All Code", status);
     }
 

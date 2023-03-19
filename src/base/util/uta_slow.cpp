@@ -49,7 +49,8 @@ void uta::max_s(VecF &max_values, const VecF &values, int period)
         max_values.push_back(sum);
     }
 
-    for (int i = 0; i < (period-1); i++) {
+    int min_size = std::min((int)values.size(), period);
+    for (int i = 0; i < min_size-1; i++) {
         max_values[i] = NAN;
     }
 }
@@ -68,7 +69,6 @@ void uta::stddev_s(VecF &stddev_values, const VecF &values, int period, bool div
     if (values.size() == 0) {
         return;
     }
-
     const float N = (float) (period - 1);   // Version1
 
     VecF means;
@@ -94,7 +94,9 @@ void uta::stddev_s(VecF &stddev_values, const VecF &values, int period, bool div
         }
     }
 
-    for (int i = 0; i < (period-1); i++) {
+    //bugfix: values.size() < period
+    int min_size = std::min((int)stddev_values.size(), period);
+    for (int i = 0; i < (min_size -1); i++) {
         stddev_values[i] = NAN;
     }
 }

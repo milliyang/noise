@@ -1,16 +1,22 @@
 #define LOG_TAG "tests"
 
+/**
+ * - Fxxk, have to #include <highfive/H5File.hpp> first !!!
+ * - otherwise MSVC compile error
+ */
+#include <highfive/H5File.hpp>
+
 #include "noise/noise.h"
 #include "noise/util2.h"
 #include "noise/log.h"
-
 #include <random>
 #include <armadillo>
 
+using namespace HighFive;
 using namespace noise;
 
 #define PERIOD      (25)
-#define SAMPLES     (100000)
+#define SAMPLES     (1000)
 
 static void chk_vec_the_same(const VecF &v0, const VecF &v1)
 {
@@ -145,6 +151,30 @@ bool test_ta_preload_version(void)
     return true;
 }
 
+void test_hdf5(void)
+{
+    std::string filename = "tests.h5";
+    {
+        // We create an empty HDF55 file, by truncating an existing
+        File file(filename, File::Truncate);
+        std::vector<int> data(50, 1);
+        file.createDataSet("grp/data", data);
+    }
+
+    {
+        File file(filename, File::ReadOnly);
+        auto dataset = file.getDataSet("grp/data");
+
+        // Read back, with allocating:
+        auto data = dataset.read<std::vector<int>>();
+
+        // Because `data` has the correct size, this will
+        // not cause `data` to be reallocated:
+        dataset.read(data);
+    }
+    LOGI("generate: {}", filename);
+}
+
 int32_t main(int32_t argc, char** argv)
 {
     log_init();
@@ -154,7 +184,9 @@ int32_t main(int32_t argc, char** argv)
     test_ta_stddev();
 
     test_ta_preload_version();
+    test_hdf5();
 
     LOGI(" ->@{} [done]", __FUNCTION__);
+    return 0;
 }
 

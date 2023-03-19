@@ -9,6 +9,7 @@ set(PROJ_DIR  "${CMAKE_SOURCE_DIR}")
 
 set(CONFIG_SPDLOG ON)
 set(CONFIG_ARMADILLO ON)
+set(CONFIG_HDF5 ON)
 
 if(CMAKE_HOST_UNIX)
 	set(SUPPORT_OPENMP_TASK ON)
@@ -42,8 +43,14 @@ include_directories("${NOISE_DIR}/3rd/glob/inc")
 file(GLOB NOISE_SRC "${NOISE_DIR}/src/base/*.cpp"
 			  		"${NOISE_DIR}/src/base/util/*.cpp"
 					"${NOISE_DIR}/src/base/indicator/*.cpp"
+					"${NOISE_DIR}/src/base/filesystem/*.cpp"
 					"${NOISE_DIR}/src/3rd/glob/*.cpp"
 )
+
+######################################## highfive
+# include_directories("${NOISE_DIR}/3rd/highfive/include")
+# add_subdirectory("${NOISE_DIR}/3rd/highfive")
+# target_link_libraries(bar HighFive)
 
 ######################################## spdlog
 if(CONFIG_SPDLOG)
@@ -77,5 +84,22 @@ if(CONFIG_ARMADILLO)
 	endif()
 endif()
 
+if(CONFIG_HDF5)
+	if(CMAKE_HOST_UNIX)
+	else()
+		# download https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/bin/windows/hdf5-1.14.0-Std-win10_64-vs17.zip
+		# install at: C:\Program Files\HDF_Group\HDF5\1.14.0\bin
+		include_directories("C:/Program Files/HDF_Group/HDF5/1.14.0/include")
+		include_directories("${NOISE_DIR}/3rd/HighFive/include")
+		SET(HighFive_DIR "${NOISE_DIR}/3rd/HighFive/share/HighFive/CMake")
+	endif()
+	find_package(HighFive REQUIRED)		# find in HighFive_DIR
+	find_package(HDF5 REQUIRED)
+endif()
+
 # message(${SRC})
-add_library(noise ${NOISE_SRC} )
+add_library(libnoise ${NOISE_SRC} )
+
+# bugfix: library dependance
+# app.exe -> dep(libnoise) -> dep(hdf5)
+target_link_libraries(libnoise ${HDF5_LIBRARIES} )

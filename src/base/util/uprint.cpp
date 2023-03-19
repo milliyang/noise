@@ -139,6 +139,31 @@ void uprint::print(const char *tag, const struct bar &bar)
 #endif
 }
 
+static const char *get_sqn_desc(float SQN)
+{
+    // 0.00 ~ 1.5:     Probably Very Hard To Trade.
+    // 1.51 ~ 2.0:     Average System (Should Be At Least 1.7).
+    // 2.01 ~ 3.00:    Good System.
+    // 3.01 ~ 5.00:    Excellent System.
+    // 5.01 ~ 7.00:    Super System (Few Exist).
+    // 7.01 Or Higher: Holy Grail System.
+    if (SQN <= 1.5 || isnan(SQN)) {
+        return "Hard To Trade   (---)";
+    } else if (SQN <= 1.7) {
+        return "Average System  (-- )";
+    } else if (SQN <= 2.0) {
+        return "Average System  (+  )";
+    } else if (SQN <= 3.0) {
+        return "Good System     (++ )";
+    } else if (SQN <= 5.0) {
+        return "Excellent       (+++)";
+    } else if (SQN <= 7.0) {
+        return "Superb          (+++)";
+    } else {
+        return "Holy Grail      (+++)";
+    }
+}
+
 void uprint::print(const char *tag, const struct stat &stat)
 {
     #define PERCENT (100.0f)
@@ -174,7 +199,8 @@ void uprint::print(const char *tag, const struct stat &stat)
     LOGI("  Avg.  Trade Duration          [days]    {:8.2f}",        stat.avg_trade_duration);
     //printf(" Profit Factor                       [%] {:7.2f}", stat.profit_factor);
     //printf(" Expectancy                            {:7.2f}", stat.expectancy);
-    LOGI("  SQN                                      {:7.2f}",       stat.SQN);
+    LOGI("  SQN    *** {} ***         {:7.2f}",                   get_sqn_desc(stat.SQN), stat.SQN);
+
 
     //For grep
     LOGD("[grep] Return:{:7.2f}% B&H Return:{:7.2f}% SQN:{:7.2f} Trades:{:4d} Win Rate:{:7.2f}% PNL:{:+11.2f}$",

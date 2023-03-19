@@ -22,14 +22,18 @@ Features
 Requirements
 ------------
 - OpenMP [Optional]     maximize 48+ Cores to run
-- Qt [Option]           for GUI ploting
+- Qt [Optional]         for GUI ploting
 - GCC
 - CMAKE
-- Tiny 3rd lib in: noise/3rd
-    - [spdlog](https://github.com/gabime/spdlog)
+- 3rd in: noise/3rd
     - [fmt](https://github.com/fmtlib/fmt)
+    - [spdlog](https://github.com/gabime/spdlog)
+    - [args](https://github.com/Taywee/args)
+    - [inih](https://github.com/benhoyt/inih)
     - [armmdillo](https://arma.sourceforge.net)
     - [glob](https://github.com/p-ranav/glob)
+    - [hdf5](https://github.com/HDFGroup/hdf5) & [HighFive](https://github.com/BlueBrain/HighFive)
+
 
 Build on Linux
 --------------
@@ -105,3 +109,23 @@ Final
 * No Lisence, or [UnLisence](https://unlicense.org/)
 * Thanks to [Github](https://github.com/), [kernc](https://github.com/kernc)
 * Again, Inspired by [backtesting.py](https://kernc.github.io/backtesting.py)
+
+
+Additional Remarks
+------------------
+* I did try not to include too much third-party library. But as project went on, they grows ...
+* Some are just tiny cpp header-only:
+    - [fmt](https://github.com/fmtlib/fmt)
+    - [spdlog](https://github.com/gabime/spdlog)
+    - [args](https://github.com/Taywee/args)
+    - [inih](https://github.com/benhoyt/inih)
+
+* Some made it easier for me to do unitest, math calculation
+    - [armadillo](https://arma.sourceforge.net)
+    - [Eigen](https://gitlab.com/libeigen/eigen)
+    - [glob](https://github.com/p-ranav/glob) & [filesystem](https://github.com/gulrak/filesystem)
+
+* Some help to speed up backtesting for large dataset:
+    - [hdf5](https://github.com/HDFGroup/hdf5) & [HighFive](https://github.com/BlueBrain/HighFive)
+
+* They may have diff Lisences ...

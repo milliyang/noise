@@ -255,7 +255,7 @@ Timelapsed::~Timelapsed(void) {
     //auto us = std::chrono::duration_cast<std::chrono::microseconds>(nano).count();
     //auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(nano).count();
     //printf("time elapsed: %d(us)  %d(nano sec)\n", (int)us, (int)ns);
-    LOGI("time elapsed: {} ms   [{}] ", nano.count() / (1000.0f * 1000.0f), a_tag.c_str());
+    LOGI("time elapsed: {:0.3f} ms   [{}] ", nano.count() / (1000.0f * 1000.0f), a_tag.c_str());
 };
 
 

@@ -18,7 +18,7 @@ void uta::ma(VecF &ma_values, const VecF &values, int period)
 
     //bugfix special case
     if (values.size() < period) {
-        for (int i = 0; i < (period-1); i++) {
+        for (int i = 0; i < values.size()-1; i++) {
             ma_values[i] = NAN;
         }
         return;

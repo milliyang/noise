@@ -66,6 +66,7 @@ namespace noise {
 using PtrSeries  = std::shared_ptr<struct series>;
 using VecF  = std::vector<float>;
 using VecI  = std::vector<int>;
+using VecU  = std::vector<uint32_t>;
 using VecS  = std::vector<std::string>;
 
 struct bt_config;
@@ -95,6 +96,11 @@ struct bar {
     float amount;
     //
     time_t time;         //seconds from "00:00:00 GMT, Jan 1, 1970"; now, most PC: sizeof(time_t) == 8
+};
+
+struct bars {
+    std::string code;
+    std::vector<struct bar> data;
 };
 
 enum order_type {
@@ -174,8 +180,15 @@ struct stat {
     float avg_trade_duration;
     //float profit_factor;
     //float expectancy;
-    float SQN;
-
+    float SQN;                      //System Quality Number  @ https://tradingtact.com/system-quality-number/
+                                    //
+                                    // SQN = root(number of trades) * (expectancy/stdev(R-multiple))
+                                    //      0.00 ~ 1.5:     Probably Very Hard To Trade.
+                                    //      1.51 ~ 2.0:     Average System (Should Be At Least 1.7).
+                                    //      2.01 ~ 3.00:    Good System.
+                                    //      3.01 ~ 5.00:    Excellent System.
+                                    //      5.01 ~ 7.00:    Super System (Few Exist).
+                                    //      7.01 Or Higher: Holy Grail System.
     struct {
         int win_trade_cnt;
         int code_cnt;
