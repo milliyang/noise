@@ -1,7 +1,7 @@
 #define LOG_TAG "fs.h5"
 
 #include "noise/filesystem/fs.h"
-#include "noise/filesystem/fs_pri.h"
+#include "noise/filesystem/fs_private.h"
 
 namespace noise {
 

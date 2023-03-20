@@ -24,6 +24,18 @@ enum FS_U_FIELD {
     FS_U_NUM,
 };
 
+enum FS_B_FIELD {
+    FS_B_CODE = 0,
+    FS_B_SYMBOL,
+    FS_B_NAME,
+    FS_B_AREA,
+    FS_B_INDUSTRY,
+    FS_B_MARKET,
+    FS_B_LIST_DATE,
+    FS_B_SEQ,
+    FS_B_NUM,
+};
+
 /**
  * struct h5_bars <-> struct bars
  * struct bars {
@@ -36,18 +48,6 @@ struct h5_bars {
     std::string code;
     VecF data[FS_F_NUM];
     VecU udata[FS_U_NUM];
-};
-
-enum FS_B_FIELD {
-    FS_B_CODE = 0,
-    FS_B_SYMBOL,
-    FS_B_NAME,
-    FS_B_AREA,
-    FS_B_INDUSTRY,
-    FS_B_MARKET,
-    FS_B_LIST_DATE,
-    FS_B_SEQ,
-    FS_B_NUM,
 };
 
 struct h5_basic {
@@ -67,9 +67,6 @@ void csv_write_bars_file(const std::vector<struct bar> &bars, const std::string 
 
 void csv_read_basic_file(h5_basic &basic, const std::string &filepath);
 void csv_write_basic_file(const h5_basic &basic, const std::string &filepath);
-
-// void fs_write_csv(std::string filename, const struct bars &src);
-// void fs_write_csv(std::string filename, const struct h5_bars &src);
 
 
 /*** hdf.cpp ***/

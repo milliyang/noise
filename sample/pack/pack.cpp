@@ -9,10 +9,10 @@
 #include "spdlog/fmt/fmt.h"
 #include "3rd/args.hxx"
 
+#include "glob.h"   // ghc::filesystem
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-#include <filesystem>
 
 using namespace noise;
 
@@ -66,8 +66,8 @@ void pack_bars_csv_to_h5(const std::string &dir, const std::string &filename, in
 void unpack_bars_h5_csv(const std::string& dir, const std::string& filename)
 {
     std::string bar_dir = fmt::format("{}/bars", dir);
-    std::filesystem::create_directory(dir);
-    std::filesystem::create_directory(bar_dir);
+    gfs::create_directory(dir);
+    gfs::create_directory(bar_dir);
 
     fs::H5 h5_reader = fs::H5(filename);
     VecS codes = h5_reader.read_codes();

@@ -9,6 +9,12 @@
 #include <filesystem>
 #endif
 
+#ifdef GLOB_USE_GHC_FILESYSTEM
+namespace gfs = ghc::filesystem;
+#else
+namespace gfs = std::filesystem;
+#endif
+
 namespace glob {
 
 #ifdef GLOB_USE_GHC_FILESYSTEM

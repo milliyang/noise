@@ -23,6 +23,12 @@ VecS hdf_read_codes(const HighFive::File &file)
     return std::move(codes);
 }
 
+void hdf_write_codes(HighFive::File &file, const VecS &src)
+{
+    file.createDataSet(H5_KEY_CODE_LIST, src);
+}
+
+
 struct h5_bars hdf_read_dataset(const HighFive::File &file, const std::string &code)
 {
     struct h5_bars out;
@@ -71,6 +77,7 @@ void hdf_write_dataset(HighFive::File &file, const struct h5_bars &src)
     }
 }
 
+
 void hdf_write_basic(HighFive::File &file, const struct h5_basic &src)
 {
     for (int i = 0; i < FS_B_NUM; i++) {
@@ -90,11 +97,6 @@ struct h5_basic hdf_read_basic(const HighFive::File &file)
         out.data[i] = std::move(data);
     }
     return std::move(out);
-}
-
-void hdf_write_codes(HighFive::File &file, const VecS &src)
-{
-    file.createDataSet(H5_KEY_CODE_LIST, src);
 }
 
 

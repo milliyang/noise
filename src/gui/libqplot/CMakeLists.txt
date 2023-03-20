@@ -41,6 +41,6 @@ include_directories("../src")
 # ┌──────────────────────────────────────────────────────────────────┐
 # │  output libqline.a                                               │
 # └──────────────────────────────────────────────────────────────────┘
-MESSAGE("From subdir: 3rd/qline")
+MESSAGE("noise::libqplot")
 add_library(libqplot STATIC ${LIB_SOURCES} ${WRAP_FILES})
 qt5_use_modules(libqplot Widgets)

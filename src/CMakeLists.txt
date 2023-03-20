@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.8.0)
 project (noise)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+add_compile_options("-std=c++17")
 
 set(NOISE_DIR "${CMAKE_SOURCE_DIR}/../")
 set(NOISE_INC "${CMAKE_SOURCE_DIR}/../src/inc")
@@ -26,13 +27,11 @@ if (DEFINED CMAKE_HOST_UNIX AND NOT DEFINED ENV{DISPLAY})
 endif()
 
 if(SUPPORT_OPENMP_TASK)
-	MESSAGE(STATUS "noise:: SUPPORT_OPENMP_TASK=ON")
 	add_definitions(-D__SUPPORT_OPENMP_TASK__)
 	find_package(OpenMP)
 	if(OpenMP_CXX_FOUND)
 		set(OPENMP_LIB OpenMP::OpenMP_CXX)
 		add_compile_options(-fopenmp)
-		message(STATUS "noise:: options:-fopenmp")
 	endif()
 endif()
 
@@ -65,35 +64,40 @@ else()
 	set(SPDLIB_LIB)
 endif()
 
-# include("${NOISE_DIR}/3rd/spdlog/lib/cmake/spdlog/spdlogConfig.cmake")
-# find_package(OpenMP)
-
 ######################################### armadillo
 if(CONFIG_ARMADILLO)
 	if(CMAKE_HOST_UNIX)
-		message(STATUS "noise:: armadillo openblas")
+		#sudo apt-get install libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev
 		#sudo apt-get install libarmadillo-dev
-		#sudo apt-get install libopenblas-dev
-		find_package(armadillo)
-		# set(ARMA_LIB openblas)
+		find_package(Armadillo REQUIRED)
+		include_directories(${ARMADILLO_INCLUDE_DIRS})
+		set(INNER_ARMA_LIB ${ARMADILLO_LIBRARIES})
 	else()
 		include_directories("${NOISE_DIR}/3rd/arma")
 		LINK_DIRECTORIES("${NOISE_DIR}/3rd/arma/lib_win64/")
 		message(STATUS "noise:: libopenblas")
-		# set(ARMA_LIB libopenblas)
+		set(INNER_ARMA_LIB libopenblas)
 	endif()
 endif()
 
 if(CONFIG_HDF5)
+	include_directories("${NOISE_DIR}/3rd/HighFive/include")
+	SET(HighFive_DIR "${NOISE_DIR}/3rd/HighFive/share/HighFive/CMake")
+
 	if(CMAKE_HOST_UNIX)
+		# download https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/bin/unix/hdf5-1.14.0-Std-ubuntu2204_64.tar.gz	[NG] require GLIBC_2.33 in ubuntu 20.04
+		# download https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/src/CMake-hdf5-1.14.0.tar.gz
+		# install at : ~/bin/hdf5/HDF5-1.14.0-Linux/HDF_Group/HDF5/1.14.0/
+
+		SET(HDF5_DIR "~/bin/hdf5/HDF5-1.14.0-Linux/HDF_Group/HDF5/1.14.0/cmake")
 	else()
 		# download https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/bin/windows/hdf5-1.14.0-Std-win10_64-vs17.zip
 		# install at: C:\Program Files\HDF_Group\HDF5\1.14.0\bin
 		include_directories("C:/Program Files/HDF_Group/HDF5/1.14.0/include")
-		include_directories("${NOISE_DIR}/3rd/HighFive/include")
-		SET(HighFive_DIR "${NOISE_DIR}/3rd/HighFive/share/HighFive/CMake")
+
+		find_package(HighFive REQUIRED)		# find in HighFive_DIR
 	endif()
-	find_package(HighFive REQUIRED)		# find in HighFive_DIR
+
 	find_package(HDF5 REQUIRED)
 endif()
 
@@ -102,4 +106,4 @@ add_library(libnoise ${NOISE_SRC} )
 
 # bugfix: library dependance
 # app.exe -> dep(libnoise) -> dep(hdf5)
-target_link_libraries(libnoise ${HDF5_LIBRARIES} )
+target_link_libraries(libnoise ${HDF5_LIBRARIES} ${INNER_ARMA_LIB} )

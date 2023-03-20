@@ -1,4 +1,5 @@
 
+#include <string>
 #include "noise/log.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -105,4 +106,9 @@ static inline void print_backtrace(void)
 void log_backtrace(void)
 {
     print_backtrace();
+}
+
+void log_printf(const std::string &data)
+{
+    printf("%s", data.c_str());
 }

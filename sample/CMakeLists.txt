@@ -10,6 +10,7 @@ set(CONFIG_QPLOT ON)
 set(CONFIG_SPDLOG ON)
 set(CONFIG_ARMADILLO ON)
 set(CONFIG_HDF5 ON)
+set(CONFIG_GNUPLOT OFF)	#disable
 
 if(CMAKE_HOST_UNIX)
 	set(SUPPORT_OPENMP_TASK ON)
@@ -28,13 +29,11 @@ if (DEFINED CMAKE_HOST_UNIX AND NOT DEFINED ENV{DISPLAY})
 endif()
 
 if(SUPPORT_OPENMP_TASK)
-	MESSAGE(STATUS "noise:: SUPPORT_OPENMP_TASK=ON")
 	add_definitions(-D__SUPPORT_OPENMP_TASK__)
 	find_package(OpenMP)
 	if(OpenMP_CXX_FOUND)
 		set(OPENMP_LIB OpenMP::OpenMP_CXX)
 		add_compile_options(-fopenmp)
-		message(STATUS "noise:: options:-fopenmp")
 	endif()
 endif()
 
@@ -42,7 +41,6 @@ include_directories("${BT_NOISE_DIR}/src/inc")
 include_directories("${BT_NOISE_DIR}/3rd/spdlog/include")
 include_directories("${BT_NOISE_DIR}/3rd/glob/inc")
 include_directories("${BT_NOISE_DIR}/3rd/filesystem/inc")
-# include_directories("${BT_NOISE_DIR}/src/extend/qplot")
 
 #spdlog
 if(CONFIG_SPDLOG)
@@ -63,14 +61,12 @@ if(CONFIG_QPLOT)
 		message(STATUS "noise:: options:-std=c++11")
 	endif()
 	add_definitions(-DCONFIG_QPLOT)
+	include_directories("${BT_NOISE_DIR}/src/gui")
+	include_directories("${BT_NOISE_DIR}/src/gui/libqplot")
 
-	include_directories("${BT_NOISE_DIR}/3rd/qline/src")
-	include_directories("${BT_NOISE_DIR}/3rd/qline/qplot")
-	include_directories("${BT_NOISE_DIR}/src/extend/qplot")
+	file(GLOB PLOT_SRC "${BT_NOISE_DIR}/src/gui/*.cpp")
 
-	file(GLOB PLOT_SRC "${BT_NOISE_DIR}/src/extend/qplot/*.cpp")
-
-	add_subdirectory("${BT_NOISE_DIR}/3rd/qline/qplot" .libqplot)        # add subdir(path, as_name)
+	add_subdirectory("${BT_NOISE_DIR}/src/gui/libqplot" .libqplot)        # add subdir(path, as_name)
 	SET(PLOT_LIB libqplot)
 	set(CONFIG_GNUPLOT OFF)	#disable
 endif()
@@ -93,10 +89,11 @@ endif()
 ################################ armadillo
 if(CONFIG_ARMADILLO)
 	if(CMAKE_HOST_UNIX)
-		#sudo apt-get install libarmadillo-dev
 		#sudo apt-get install libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev
-		find_package(armadillo)
-		set(ARMA_LIB armadillo)
+		#sudo apt-get install libarmadillo-dev
+		find_package(Armadillo REQUIRED)
+		include_directories(${ARMADILLO_INCLUDE_DIRS})
+		set(ARMA_LIB ${ARMADILLO_LIBRARIES})
 	else()
 		include_directories("${BT_NOISE_DIR}/3rd/arma")
 		LINK_DIRECTORIES("${BT_NOISE_DIR}/3rd/arma/lib_win64/")
@@ -106,15 +103,21 @@ endif()
 
 ################################ HighFive && HDF5
 if(CONFIG_HDF5)
+	include_directories("${BT_NOISE_DIR}/3rd/HighFive/include")
+	SET(HighFive_DIR "${BT_NOISE_DIR}/3rd/HighFive/share/HighFive/CMake")
+
 	if(CMAKE_HOST_UNIX)
+		# download https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/bin/unix/hdf5-1.14.0-Std-ubuntu2204_64.tar.gz	[NG] require GLIBC_2.33 in ubuntu 20.04
+		# download https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/src/CMake-hdf5-1.14.0.tar.gz
+		# install at : ~/bin/hdf5/HDF5-1.14.0-Linux/HDF_Group/HDF5/1.14.0/
+		SET(HDF5_DIR "~/bin/hdf5/HDF5-1.14.0-Linux/HDF_Group/HDF5/1.14.0/cmake")
 	else()
 		# download https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/bin/windows/hdf5-1.14.0-Std-win10_64-vs17.zip
 		# install at: C:\Program Files\HDF_Group\HDF5\1.14.0\bin
 		include_directories("C:/Program Files/HDF_Group/HDF5/1.14.0/include")
-		include_directories("${BT_NOISE_DIR}/3rd/HighFive/include")
-		SET(HighFive_DIR "${BT_NOISE_DIR}/3rd/HighFive/share/HighFive/CMake")
+		find_package(HighFive REQUIRED)		# find in HighFive_DIR
 	endif()
-	find_package(HighFive REQUIRED)		# find in HighFive_DIR
+
 	find_package(HDF5 REQUIRED)
 endif()
 
@@ -132,10 +135,11 @@ else()
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+################################ libnoise
 add_subdirectory("${BT_NOISE_DIR}/src" .libnoise)        # add subdir(path, as_name)
 SET(NOISE_LIB libnoise)
 
-# file(GLOB CD_SRC "cd/*.cpp")
+
 
 # for each sample folder, build one program
 file(GLOB_RECURSE SAMPLE_FOLDERS LIST_DIRECTORIES true RELATIVE "${CMAKE_SOURCE_DIR}" sample)

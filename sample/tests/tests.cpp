@@ -61,11 +61,11 @@ bool test_ta_ma_speed(void)
     VecF ma1;
     VecF values = get_random_vec(SAMPLES);
     {
-        noise::Timelapsed time_performance(__FUNCTION__ "->ma");
+        noise::Timelapsed time_performance(fmt::format("{}{}", __FUNCTION__, "->ma"));
         uta::ma(ma0, values, PERIOD);
     }
     {
-        noise::Timelapsed time_performance(__FUNCTION__ "->ma_s");
+        noise::Timelapsed time_performance(fmt::format("{}{}", __FUNCTION__, "->ma_s"));
         uta::ma_s(ma1, values, PERIOD);
     }
     chk_vec_the_same(ma0, ma1);
@@ -73,7 +73,7 @@ bool test_ta_ma_speed(void)
     arma::frowvec ma2;
     arma::frowvec src = arma::frowvec(values);
     {
-        noise::Timelapsed time_performance(__FUNCTION__ "->arma::ma");
+        noise::Timelapsed time_performance(fmt::format("{}{}", __FUNCTION__, "->arma::ma"));
         ma2 = uarma::ma(src, PERIOD);
     }
     chk_vec_the_same(ma0, ma2);
@@ -88,11 +88,11 @@ bool test_ta_max(void)
     VecF ma1;
     VecF values = get_random_vec(SAMPLES);
     {
-        noise::Timelapsed time_performance(__FUNCTION__ "->max");
+        noise::Timelapsed time_performance(fmt::format("{}{}", __FUNCTION__, "->max"));
         uta::max(ma0, values, PERIOD);
     }
     {
-        noise::Timelapsed time_performance(__FUNCTION__ "->max_s");
+        noise::Timelapsed time_performance(fmt::format("{}{}", __FUNCTION__, "->max_s"));
         uta::max_s(ma1, values, PERIOD);
     }
     chk_vec_the_same(ma0, ma1);
@@ -100,7 +100,7 @@ bool test_ta_max(void)
     arma::frowvec ma2;
     arma::frowvec src = arma::frowvec(values);
     {
-        noise::Timelapsed time_performance(__FUNCTION__ "->arma::max");
+        noise::Timelapsed time_performance(fmt::format("{}{}", __FUNCTION__, "->arma::max"));
         ma2 = uarma::max(src, PERIOD);
     }
     chk_vec_the_same(ma0, ma2);
@@ -115,11 +115,11 @@ bool test_ta_stddev(void)
     VecF ma1;
     VecF values = get_random_vec(SAMPLES);
     {
-        noise::Timelapsed time_performance(__FUNCTION__ "->stddev");
+        noise::Timelapsed time_performance(fmt::format("{}{}", __FUNCTION__, "->stddev"));
         uta::stddev(ma0, values, PERIOD);
     }
     {
-        noise::Timelapsed time_performance(__FUNCTION__ "->stddev_s");
+        noise::Timelapsed time_performance(fmt::format("{}{}", __FUNCTION__, "->stddev_s"));
         uta::stddev_s(ma1, values, PERIOD);
     }
     chk_vec_the_same(ma0, ma1);
@@ -127,7 +127,7 @@ bool test_ta_stddev(void)
     arma::frowvec ma2;
     arma::frowvec src = arma::frowvec(values);
     {
-        noise::Timelapsed time_performance(__FUNCTION__ "->arma::stddev");
+        noise::Timelapsed time_performance(fmt::format("{}{}", __FUNCTION__, "->arma::stddev"));
         ma2 = uarma::stddev(src, PERIOD);
     }
     chk_vec_the_same(ma0, ma2);

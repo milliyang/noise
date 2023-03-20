@@ -15,10 +15,9 @@ void csv_read_bars_file(std::vector<struct bar> &bars, const std::string &filepa
 {
     std::ifstream input{filepath};
 
-    //
     // trade_date,ts_code,open,high,low,close,pre_close,change,pct_chg,vol,amount
-    // 20180102,000001.SZ,12.6805,13.2314,12.652,13.0129,12.633,0.379900000000001,3.0072,2081592.55,2856543.822
-    // 20180103,000001.SZ,13.0414,13.1649,12.538,12.6615,13.0129,-0.35139999999999993,-2.7004,2962498.38,4006220.766
+    // 20180102,000001.SZ,12.6805,13.2314,12.652,13.0129,12.633,0.3799,3.0072,2081592.55,2856543.822
+    // 20180103,000001.SZ,13.0414,13.1649,12.538,12.6615,13.0129,-0.3514,-2.7004,2962498.38,4006220.766
 
     if (!input.is_open()) {
         LOGE("open failed: {}", filepath);
@@ -85,11 +84,9 @@ void csv_write_bars_file(const std::vector<struct bar> &bars, const std::string 
 {
     std::ofstream output{filepath};
 
-    //
     // trade_date,ts_code,open,high,low,close,pre_close,change,pct_chg,vol,amount
-    // 20180102,000001.SZ,12.6805,13.2314,12.652,13.0129,12.633,0.379900000000001,3.0072,2081592.55,2856543.822
-    // 20180103,000001.SZ,13.0414,13.1649,12.538,12.6615,13.0129,-0.35139999999999993,-2.7004,2962498.38,4006220.766
-
+    // 20180102,000001.SZ,12.6805,13.2314,12.652,13.0129,12.633,0.3799,3.0072,2081592.55,2856543.822
+    // 20180103,000001.SZ,13.0414,13.1649,12.538,12.6615,13.0129,-0.3514,-2.7004,2962498.38,4006220.766
     output << "trade_date,ts_code,open,high,low,close,pre_close,change,pct_chg,vol,amount\n";
     for (int i = 0; i < bars.size(); i++) {
         const auto &bar = bars[i];
