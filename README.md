@@ -30,7 +30,7 @@ Requirements
     - [spdlog](https://github.com/gabime/spdlog)
     - [args](https://github.com/Taywee/args)
     - [inih](https://github.com/benhoyt/inih)
-    - [armmdillo](https://arma.sourceforge.net)
+    - [Armadillo](https://arma.sourceforge.net)
     - [glob](https://github.com/p-ranav/glob)
     - [hdf5](https://github.com/HDFGroup/hdf5) & [HighFive](https://github.com/BlueBrain/HighFive)
 
@@ -121,7 +121,7 @@ Additional Remarks
     - [inih](https://github.com/benhoyt/inih)
 
 * Some made it easier for me to do unitest, math calculation
-    - [armadillo](https://arma.sourceforge.net)
+    - [Armadillo](https://arma.sourceforge.net)
     - [Eigen](https://gitlab.com/libeigen/eigen)
     - [glob](https://github.com/p-ranav/glob) & [filesystem](https://github.com/gulrak/filesystem)
 
