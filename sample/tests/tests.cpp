@@ -11,6 +11,7 @@
 #include "noise/log.h"
 #include <random>
 #include <armadillo>
+#include "noise/math/histogram.h"
 
 using namespace HighFive;
 using namespace noise;
@@ -44,13 +45,38 @@ static void chk_vec_the_same(const arma::frowvec &v0, const arma::frowvec &v1)
     }
 }
 
-static VecF get_random_vec(int length = 1000)
+static VecF get_random_vec(int length = 1000, int min = 0, int max = 9)
 {
     std::random_device rd;
-    std::uniform_int_distribution<int> dist(0, 9);
+    std::uniform_int_distribution<int> dist(min, max);
     VecF values;
     for (int i = 0; i < length; i++) {
         values.push_back((float)dist(rd));
+    }
+    return std::move(values);
+}
+
+static VecF get_random_vec_real(int length = 1000, float min = 0.0f, float max = 1.0f)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<float> dist(min, max);
+    VecF values;
+    for (int i = 0; i < length; i++) {
+        values.push_back(dist(gen));
+    }
+    return std::move(values);
+}
+
+static VecF get_normalize_vec_real(int length = 1000, float min = 0.0f, float max = 1.0f)
+{
+    std::random_device rd;
+    std::mt19937 gen{rd()};
+    std::normal_distribution<float> dist{min, max};
+
+    VecF values;
+    for (int i = 0; i < length; i++) {
+        values.push_back(dist(gen));
     }
     return std::move(values);
 }
@@ -175,6 +201,20 @@ void test_hdf5(void)
     LOGI("generate: {}", filename);
 }
 
+void test_math_histogram(void)
+{
+    const float OFFSET = 0;
+    const float SIGMA = 2.0;
+
+    math::Histogram histo;
+    //VecF vec = get_random_vec_real(10000, -1.0, 1.0);
+    VecF vec = get_normalize_vec_real(100000, OFFSET, SIGMA);
+    for (int i = 0; i < vec.size(); i++) {
+        histo.push(vec[i]);
+    }
+    histo.print();
+}
+
 int32_t main(int32_t argc, char** argv)
 {
     log_init();
@@ -185,6 +225,7 @@ int32_t main(int32_t argc, char** argv)
 
     test_ta_preload_version();
     test_hdf5();
+    test_math_histogram();
 
     LOGI(" ->@{} [done]", __FUNCTION__);
     return 0;

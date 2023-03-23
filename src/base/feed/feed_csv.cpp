@@ -1,28 +1,11 @@
-#define LOG_TAG "feed "
+#define LOG_TAG "feed.csv"
 
-#include "noise/def.h"
-#include "noise/feed.h"
+#include "noise/feed/feed_csv.h"
+#include "noise/feed/feed.h"
 #include "noise/util.h"
 #include "noise/log.h"
 
-
 namespace noise {
-
-Feed::Feed(void)
-{
-}
-
-Feed::~Feed(void)
-{
-}
-
-FeedCSV::FeedCSV(void)
-{
-}
-
-FeedCSV::~FeedCSV(void)
-{
-}
 
 void FeedCSV::load_bars(void)
 {

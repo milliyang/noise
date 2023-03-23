@@ -140,7 +140,7 @@ void util::parse_ini_code_file(std::vector<struct code_info> &codes, const std::
     INIReader reader(filepath);
 
     if (reader.ParseError() < 0) {
-        LOGE("Can't load 'test.ini'");
+        LOGE("Can't load {}", filepath);
         return;
     }
     auto codes_str = reader.Get("Backtest", "codes", "NULL");
@@ -247,6 +247,18 @@ std::string util::get_filename_without_extension(const std::string& filepath)
     return"";
 }
 
+bool util::is_end_with(const std::string& filepath, const std::string& substr)
+{
+    if (substr.length() >= filepath.length()) {
+        return false;
+    }
+    auto end_str = filepath.substr(filepath.length() - substr.length(), substr.length());
+    if (end_str == substr) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 Timelapsed::Timelapsed(std::string tag) {start = std::chrono::high_resolution_clock::now(); a_tag=tag;}
 

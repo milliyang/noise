@@ -58,7 +58,8 @@ struct h5_basic {
 struct h5_bars  fs_get_h5_bars(const struct bars &src);
 struct h5_basic fs_get_basic(const std::vector<struct code_info> &infos);
 
-struct bars     fs_get_bars(const struct h5_bars &src);
+struct bars fs_get_bars(const struct h5_bars &src);
+std::vector<struct code_info> fs_get_basic(const struct h5_basic &src);
 
 
 /*** csv.cpp ***/

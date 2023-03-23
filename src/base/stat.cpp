@@ -193,9 +193,9 @@ void Stat::calc_stat(void)
         if (status_.equity_peak < equity_cur) {
             status_.equity_peak = equity_cur;
         }
-        if (trade.PNL > 0) {
-            win_cnt++;
-        }
+        //if (trade.PNL >= 0) {
+            //win_cnt++;
+        //}
         if (best_trade_on_pnl < trade.PNL) {
             best_trade_on_pnl = trade.PNL;
         }
@@ -209,6 +209,9 @@ void Stat::calc_stat(void)
         }
         if (worst_trade_on_ratio > profit) {
             worst_trade_on_ratio = profit;
+        }
+        if (profit >= 0) {
+            win_cnt++;
         }
         avg_profit_ratio += profit;
 

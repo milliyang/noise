@@ -17,6 +17,7 @@ const static char *args0_usage = "\n"                                   \
 "    >./bt -m 100000.0              //init equity                  \n"  \
 "    >./bt -f .code.csv             //codes                        \n"  \
 "    >./bt -f .code.csv -k10 -n200  //codes.skip(10).head(200)     \n"  \
+"    >./bt -f .code.csv -s0         //skip stat info               \n"  \
 ";\n"                                                              \
 ;
 
@@ -47,6 +48,7 @@ int uargs::args0_parse(const char *title, int32_t argc, char** argv)
     args::ValueFlag<std::string>    codefile(parser,      "file ",     "codes in file",                 {'f',  ARGS_CODE_FILE});
     args::ValueFlag<std::string>    num(parser,           " num ",     "codes.head(num)",               {'n',  ARGS_NUM});
     args::ValueFlag<std::string>    skip(parser,          "skip ",     "codes.skip(num)",               {'k',  ARGS_SKIP});
+    args::ValueFlag<std::string>    stat(parser,          " int ",     "print stat info",               {'s',  ARGS_STAT});
     args::Positional<std::string>   image_input(parser,   "image",     "input image");
 
     //TODO:
@@ -74,6 +76,9 @@ int uargs::args0_parse(const char *title, int32_t argc, char** argv)
         }
         if (skip) {
             param->args_map.emplace(ARGS_SKIP, args::get(skip).c_str());
+        }
+        if (stat) {
+            param->args_map.emplace(ARGS_STAT, args::get(stat).c_str());
         }
         if (ahelp) {
             std::cerr << parser;

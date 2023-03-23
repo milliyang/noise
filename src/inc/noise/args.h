@@ -13,6 +13,7 @@
 #define ARGS_BEGIN_DATE  "begin_date"       // begin date             -d
 #define ARGS_NUM         "num"              // backtest code num      -n
 #define ARGS_SKIP        "skip"             // skip code num          -k
+#define ARGS_STAT        "stat"             // print stat summary     -s
 
 namespace noise {
 

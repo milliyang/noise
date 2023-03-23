@@ -5,7 +5,7 @@
 #include "glob.h"
 #include <armadillo>
 
-#include "noise/feed.h"
+#include "noise/feed/feed_csv.h"
 
 #ifdef CONFIG_QPLOT
 #include "qplot.h"

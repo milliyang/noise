@@ -18,8 +18,8 @@ struct feed_config {
 class Feed {
 
 public:
-    Feed(void);
-    ~Feed(void);
+    Feed(void) {};
+    ~Feed() {};
 
     virtual void init(const struct feed_config &cfg) = 0;
     virtual bool next(struct bar &bar) = 0;
@@ -29,24 +29,7 @@ public:
     struct feed_config config_;
 };
 
-class FeedCSV : public Feed {
-
-public:
-    FeedCSV(void);
-    ~FeedCSV(void);
-
-    void init(const struct feed_config &cfg) override;
-    bool next(struct bar &bar) override;
-    bool is_support_preload(void);
-    std::vector<struct bar>& get_bars(void) override;
-
-private:
-    void load_bars(void);
-
-    uint32_t index_;
-    std::vector<struct bar> bars_;
-    std::string code_;
-};
+using FeedPtr = std::shared_ptr<Feed>;
 
 } // namespace name
 

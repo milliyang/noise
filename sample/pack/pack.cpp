@@ -2,6 +2,7 @@
 #define LOG_TAG "pack"
 
 #include "noise/filesystem/fs.h"
+#include "noise/feed/feed_csv.h"
 
 #include "noise/noise.h"
 #include "noise/util2.h"

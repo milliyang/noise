@@ -199,7 +199,7 @@ void uprint::print(const char *tag, const struct stat &stat)
     LOGI("  Avg.  Trade Duration          [days]    {:8.2f}",        stat.avg_trade_duration);
     //printf(" Profit Factor                       [%] {:7.2f}", stat.profit_factor);
     //printf(" Expectancy                            {:7.2f}", stat.expectancy);
-    LOGI("  SQN    *** {} ***         {:7.2f}",                   get_sqn_desc(stat.SQN), stat.SQN);
+    LOGI("  SQN     {}            {:7.2f}",                   get_sqn_desc(stat.SQN), stat.SQN);
 
 
     //For grep

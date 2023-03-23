@@ -65,12 +65,31 @@ struct h5_basic fs_get_basic(const std::vector<struct code_info> &infos)
         out.data[FS_B_AREA].push_back(info.area);
         out.data[FS_B_INDUSTRY].push_back(info.industry);
         out.data[FS_B_MARKET].push_back(info.market);
-        out.data[FS_B_LIST_DATE].push_back(fmt::format("{}",info.list_date));
+        out.data[FS_B_LIST_DATE].push_back(info.list_date);
         out.data[FS_B_SEQ].push_back(info.seq);
     }
     return std::move(out);
 }
 
+std::vector<struct code_info> fs_get_basic(const struct h5_basic &src)
+{
+    std::vector<struct code_info> out;
+
+    for (int i = 0; i < src.data[0].size(); i++) {
+        struct code_info info;
+        info.code       = src.data[FS_B_CODE].at(i);
+        info.symbol     = src.data[FS_B_SYMBOL].at(i);
+        info.name       = src.data[FS_B_NAME].at(i);
+        info.area       = src.data[FS_B_AREA].at(i);
+        info.industry   = src.data[FS_B_INDUSTRY].at(i);
+        info.market     = src.data[FS_B_MARKET].at(i);
+        info.list_date  = src.data[FS_B_LIST_DATE].at(i);
+        info.seq        = src.data[FS_B_SEQ].at(i);
+        out.push_back(info);
+    }
+
+    return std::move(out);
+}
 
 } // namespace fs
 } // namespace noise

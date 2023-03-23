@@ -13,7 +13,8 @@ void init(void)
    log_init();
    LOGI("noise::init");
    LOGI("mcache::init");
-   mcache::init();
+   mcache::init("chs.code.h5");
+   //mcache::init();
    LOGI("Armadillo version: {}", arma::arma_version::as_string());
 }
 

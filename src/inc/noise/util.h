@@ -14,6 +14,8 @@ namespace util {
 
     std::string get_filename_with_extension(const std::string& filepath);
     std::string get_filename_without_extension(const std::string& filepath);
+
+    bool is_end_with(const std::string& filepath, const std::string& substr);
 }
 
 namespace uprint {

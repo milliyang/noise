@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 3.8.0)
 project (noise)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-add_compile_options("-std=c++17")
 
 set(NOISE_DIR "${CMAKE_SOURCE_DIR}/../")
 set(NOISE_INC "${CMAKE_SOURCE_DIR}/../src/inc")
@@ -16,6 +15,7 @@ if(CMAKE_HOST_UNIX)
 	set(SUPPORT_OPENMP_TASK ON)
 	set(LinuxLib pthread)
 	add_compile_options(-fPIE)
+	add_compile_options("-std=c++17")
 else()
 	set(SUPPORT_OPENMP_TASK OFF)
 	set(LinuxLib "")
@@ -43,6 +43,8 @@ file(GLOB NOISE_SRC "${NOISE_DIR}/src/base/*.cpp"
 			  		"${NOISE_DIR}/src/base/util/*.cpp"
 					"${NOISE_DIR}/src/base/indicator/*.cpp"
 					"${NOISE_DIR}/src/base/filesystem/*.cpp"
+					"${NOISE_DIR}/src/base/feed/*.cpp"
+					"${NOISE_DIR}/src/base/math/*.cpp"
 					"${NOISE_DIR}/src/3rd/glob/*.cpp"
 )
 

@@ -9,6 +9,7 @@
 namespace noise {
 
 bool Strategy::plot_on_finish_ = true;            //shared between all strategy
+bool Strategy::stat_on_finish_ = true;            //shared between all strategy
 
 Strategy::Strategy(void)
 {

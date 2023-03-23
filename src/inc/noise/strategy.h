@@ -65,6 +65,7 @@ protected:
 
 protected:
     static bool plot_on_finish_;            //shared between all strategy
+    static bool stat_on_finish_;            //shared between all strategy
 
 
     friend class Backtest;

@@ -31,7 +31,7 @@ struct BtContext {
     std::shared_ptr<Stat>       stat;
     std::shared_ptr<Strategy>   strategy;
     std::shared_ptr<Data>       data;
-    std::shared_ptr<Plot>       plot;
+    //std::shared_ptr<Plot>       plot;
 };
 
 void init(void);
@@ -43,7 +43,7 @@ void plot(const std::string figure, const std::vector<float> *series, bool show 
 //include all noise headers here:
 #include "noise/util.h"
 #include "noise/broker.h"
-#include "noise/feed.h"
+#include "noise/feed/feed.h"
 #include "noise/position.h"
 #include "noise/stat.h"
 #include "noise/strategy.h"

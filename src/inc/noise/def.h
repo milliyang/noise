@@ -78,7 +78,7 @@ struct code_info {
     std::string area;           //"深圳"
     std::string industry;       //"银行"
     std::string market;         //"主板"
-    int list_date;              //[YYYYMMDD] 19910403
+    std::string list_date;      //[YYYYMMDD] 19910403
     std::string seq;
 };
 

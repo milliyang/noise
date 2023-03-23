@@ -5,9 +5,12 @@
 #include "noise/broker.h"
 #include "noise/stat.h"
 #include "noise/strategy.h"
-#include "noise/feed.h"
+#include "noise/feed/feed.h"
 #include "noise/util.h"
 #include "noise/args.h"
+#include "noise/mcache.h"
+
+#include "noise/math/histogram.h"
 
 #ifdef __SUPPORT_OPENMP_TASK__
 #include <omp.h>
@@ -38,8 +41,6 @@ void Backtest::make_strategy(uint32_t id)
     struct BtContext ctx;
     ctx.broker = std::make_shared<Broker>();
     ctx.stat   = std::make_shared<Stat>();
-    ctx.feed   = std::make_shared<FeedCSV>();
-    //ctx.plot   = std::make_shared<Plot>();
     ctx.data   = std::make_shared<Data>();
     ctx.stat->init(ctx.broker, ctx.data);
 
@@ -53,10 +54,11 @@ void Backtest::make_strategy(uint32_t id)
     }
     ctx.broker->init(config_.broker);
 
-    //todo:
-    struct feed_config cfg = config_.feed;
-    cfg.code = config_.codes.at(id);
-    ctx.feed->init(cfg);
+    struct feed_config feed_cfg = config_.feed;
+    if (config_.codes.size() > 0) {
+        feed_cfg.code = config_.codes.at(id);
+    }
+    ctx.feed   = mcache::get_feed(feed_cfg);
 
     //after feed init
     ctx.data->setup(ctx.broker, ctx.feed, config_.plot);
@@ -87,8 +89,9 @@ void Backtest::run_strategy(const struct BtContext &ctx)
     ctx.strategy->on_bar_stop();
     ctx.broker->on_finish();
     ctx.stat->on_finish();
-    ctx.stat->plot();
-    LOGW("finish");
+    if (Strategy::stat_on_finish_) {
+        ctx.stat->plot();
+    }
     ctx.strategy->on_finish();
 }
 
@@ -138,6 +141,9 @@ void Backtest::run()
             run_strategy(context_vector_.at(i));
         }
     }
+    LOGI("finish");
+
+    math::Histogram histo(64);
 
     //show total summary of all backtests
     if (context_vector_.size() > 1) {
@@ -168,6 +174,8 @@ void Backtest::run()
             for (auto it = trades.begin(); it != trades.end(); ++it) {
                 const struct trade& trade = *it;
                 vec_pnl.push_back(trade.PNL);
+
+                histo.push(trade.profit()*100);
             }
         }
 
@@ -176,6 +184,8 @@ void Backtest::run()
 
         status.SQN = sqrtf((float)vec_pnl.size()) * umath::mean(vec_pnl) / umath::stddev(vec_pnl);
         uprint::print("All Code", status);
+
+        histo.print();
     }
 
     deinit();
