@@ -95,7 +95,7 @@ Build on Windows with GUI Ploting
     MSBuild.exe noise.sln           # require VisualStudio
     .\Debug\cd.exe
 ```
-![output_image](https://bg-so-1.zippyimage.com/2023/03/12/4f0a4a172cc3761cf68bee597bb7612d.png)
+![output_image](https://raw.githubusercontent.com/milliyang/noise/main/data/qplot.png)
 
 Contibutes
 ----------
