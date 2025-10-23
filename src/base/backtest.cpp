@@ -47,7 +47,7 @@ void Backtest::make_strategy(uint32_t id)
     ctx.strategy = func_get_strategy_();
     ctx.strategy->set_id(id);
     ctx.strategy->init(ctx.broker);
-    ctx.strategy->set_context(ctx);
+    //ctx.strategy->set_context(ctx);
 
     if (id == 0) {
         ctx.strategy->on_create(config_);
@@ -65,6 +65,8 @@ void Backtest::make_strategy(uint32_t id)
     ctx.data->setup_plot(config_.func.plot);
 
     ctx.strategy->set_code(config_.codes.at(id));
+    ctx.strategy->set_context(ctx);
+    
     context_vector_.push_back(ctx);
     if (id == 0) {
         context_ = ctx;
