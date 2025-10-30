@@ -86,6 +86,11 @@ void util::parse_csv_bars_file(std::vector<struct bar> &bars, const std::string 
     time_t cache_time;
 
     for (std::string line; std::getline(input, line);) {
+
+        if (line[0] == '#') {
+            continue;
+        }
+
         std::istringstream ss(std::move(line));
         std::vector<std::string> one_row;
 

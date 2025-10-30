@@ -8,28 +8,50 @@
 
 namespace noise {
 
+int init(int32_t argc, char** argv)
+{
+    int ret;
+    log_init();
+    LOGI("noise::init");
+
+    if (argc > 0) {
+        ret = uargs::args0_parse(__FILE__, argc, argv);
+        if (ret != 0) {
+            return ret;
+        }
+    }
+
+    PtrArgs args = uargs::args0_get();
+
+    LOGI("mcache::init");
+    if (args->has(ARGS_DATASET)) {
+        auto dataset = args->get(ARGS_DATASET);
+        mcache::init(dataset);
+    } else {
+        mcache::init(".code.csv");
+    }
+    //mcache::init();
+    LOGI("Armadillo version: {}", arma::arma_version::as_string());
+    return 0;
+}
+
 void init(void)
 {
-   log_init();
-   LOGI("noise::init");
-   LOGI("mcache::init");
-   mcache::init("chs.code.h5");
-   //mcache::init();
-   LOGI("Armadillo version: {}", arma::arma_version::as_string());
+    init(0, NULL);
 }
 
 void plot(const std::string figure, const std::vector<float> *series, bool show)
 {
-   if (series) {
-      //TODO:
-      // add series to figure
-   }
+    if (series) {
+        //TODO:
+        // add series to figure
+    }
 
-   if (show) {
-      //TODO:
-      // show window;
-      // wait qapp
-   }
+    if (show) {
+        //TODO:
+        // show window;
+        // wait qapp
+    }
 }
 
 }

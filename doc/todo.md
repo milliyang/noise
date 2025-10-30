@@ -12,6 +12,9 @@ TODO LIST (20230111)
 - support without preload  (avoid peek data ahead)                  =>done
 - unitest for preload                                               =>done
 - verify ma/stddev utest; compare to armadillo,ta-lib,              =>done
+- support histogram                                                 =>done
+- supoort larget dataset batch processing (hdf5)                    =>done
+
 
 - yml or ini config
 - show buy,sell check point ( special series: start,arrow,triangle,text)

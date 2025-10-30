@@ -10,10 +10,11 @@
 #define ARGS_CODE        "code"             // backtest codes files   -c      //conflict with -f
 #define ARGS_CODE_FILE   "code_file"        // backtest one code      -f
 #define ARGS_INIT_CASH   "init_cash"        // init cash money        -m
-#define ARGS_BEGIN_DATE  "begin_date"       // begin date             -d
+#define ARGS_BEGIN_DATE  "begin_date"       // begin date             -b
 #define ARGS_NUM         "num"              // backtest code num      -n
 #define ARGS_SKIP        "skip"             // skip code num          -k
 #define ARGS_STAT        "stat"             // print stat summary     -s
+#define ARGS_DATASET     "dataset"          // dataset for batch      -d
 
 namespace noise {
 

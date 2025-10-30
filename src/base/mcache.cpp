@@ -28,15 +28,14 @@ struct context {
 static bool    s_inited = false;
 static context s_ctx;
 
-void init(const char *path)
+void init(const std::string &filepath)
 {
     memset(&s_ctx, 0, sizeof(s_ctx));
     s_ctx.code_map = new CodeMap();
     s_ctx.code_vec =  new CodeVec();
 
-    std::string filepath = path;
     if (util::is_end_with(filepath, ".h5")) {
-        gfs::path h5_path{path};
+        gfs::path h5_path{filepath};
         if (gfs::exists(h5_path)) {
             LOGI("using dataset:{}", filepath);
             s_ctx.h5 = new fs::H5(filepath);
@@ -87,6 +86,21 @@ void get_all_code_info(std::vector<code_info> &codes)
     CodeVec* vec_ = s_ctx.code_vec;
     codes = *vec_;
     return;
+}
+
+struct bars get_bars(const std::string &code)
+{
+    if (s_ctx.h5) {
+        if (has_code(code)) {
+            auto h5bar = s_ctx.h5->read_bars(code);
+            auto bars = fs::fs_get_bars(h5bar);
+            return std::move(bars);
+        }
+    }
+
+    //not found
+    struct bars bars;
+    return std::move(bars);
 }
 
 FeedPtr get_feed(const struct feed_config &cfg)

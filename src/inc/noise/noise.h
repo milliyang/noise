@@ -35,6 +35,7 @@ struct BtContext {
 };
 
 void init(void);
+int  init(int32_t argc, char** argv);
 
 void plot(const std::string figure, const std::vector<float> *series, bool show = false);
 

@@ -3,6 +3,7 @@
 #include <functional>
 #include "noise/noise.h"
 #include "noise/args.h"
+#include "noise/math/position_tracker.h"
 
 namespace noise
 {
@@ -36,13 +37,16 @@ public:
     void run(void);
 
 private:
-    void init();
-    void deinit();
+    void init(void);
+    void post_process(void);
+    void deinit(void);
 
     void make_strategy(uint32_t id);
     void run_strategy(const struct BtContext &context);
 
     void load_config(std::string filepath);
+
+    
 
 private:
     FuncStrategy func_get_strategy_;
@@ -50,8 +54,10 @@ private:
     std::vector<struct BtContext> context_vector_;
 
 private:
-    const std::string build_date_;
-    struct bt_config config_;
+    const std::string       build_date_;
+    struct bt_config        config_;
+    math::PositionTracker   position_tracker_;
+    bool                    position_tracker_enable_;
 };
 
 

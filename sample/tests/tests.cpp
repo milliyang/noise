@@ -203,15 +203,29 @@ void test_hdf5(void)
 
 void test_math_histogram(void)
 {
-    const float OFFSET = 0;
+    const float OFFSET = 99;
     const float SIGMA = 2.0;
-
-    math::Histogram histo;
-    //VecF vec = get_random_vec_real(10000, -1.0, 1.0);
+    math::Histogram histo(32, true);
+#if 0
     VecF vec = get_normalize_vec_real(100000, OFFSET, SIGMA);
     for (int i = 0; i < vec.size(); i++) {
         histo.push(vec[i]);
     }
+#else
+    histo.push(100.0f);histo.push(100.0f);histo.push(100.0f);
+    histo.push(100.0f);histo.push(100.0f);histo.push(100.0f);
+    histo.push(100.0f);histo.push(100.0f);histo.push(100.0f);
+    histo.push(100.0f);histo.push(100.0f);histo.push(100.0f);
+    histo.push(99.0f);
+    histo.push(98.0f);
+    histo.push(97.0f);
+    histo.push(92.0f);
+    histo.push(5.0f);
+    histo.push(-1.0f);
+
+    histo.push(141.0f);
+    histo.push(140.0f);
+#endif
     histo.print();
 }
 

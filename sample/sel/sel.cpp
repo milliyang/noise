@@ -105,7 +105,7 @@ int32_t main(int32_t argc, char** argv)
     struct feed_config cfg;
     cfg.code = "300015.SZ";
     // cfg.root_path = "P:/tmpfs/root.20230311";
-    cfg.filename = "D:/quant/noise/build/Debug/000026.SZ.csv";
+    cfg.filename = "D:/root/bars/000026.SZ.csv";
 
     noise::FeedCSV feed;
     feed.init(cfg);

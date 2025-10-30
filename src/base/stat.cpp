@@ -11,6 +11,7 @@ namespace noise {
 Stat::Stat(void)
 {
     equity_series_ = nullptr;
+    memset(&status_, 0, sizeof(status_));
 }
 
 Stat::~Stat(void)
@@ -190,33 +191,22 @@ void Stat::calc_stat(void)
         status_.PNL += trade.PNL;
         equity_cur += trade.PNL;
 
-        if (status_.equity_peak < equity_cur) {
-            status_.equity_peak = equity_cur;
-        }
-        //if (trade.PNL >= 0) {
-            //win_cnt++;
-        //}
-        if (best_trade_on_pnl < trade.PNL) {
-            best_trade_on_pnl = trade.PNL;
-        }
-        if (worst_trade_on_pnl > trade.PNL) {
-            worst_trade_on_pnl = trade.PNL;
-        }
+        status_.equity_peak = std::max(status_.equity_peak, equity_cur);
 
-        float profit = trade.profit();
-        if (best_trade_on_ratio < profit) {
-            best_trade_on_ratio = profit;
-        }
-        if (worst_trade_on_ratio > profit) {
-            worst_trade_on_ratio = profit;
-        }
-        if (profit >= 0) {
+        if (trade.PNL > 0) {
             win_cnt++;
         }
+        best_trade_on_pnl  = std::max(best_trade_on_pnl, trade.PNL);
+        worst_trade_on_pnl = std::min(worst_trade_on_pnl, trade.PNL);
+
+        float profit = trade.profit();
+        best_trade_on_ratio  = std::max(best_trade_on_ratio, profit);
+        worst_trade_on_ratio = std::min(worst_trade_on_ratio, profit);
+
         avg_profit_ratio += profit;
 
         int dura = (int)(trade.exit_time - trade.entry_time);
-        if (max_duration < dura) {
+        if (dura > max_duration) {
             max_duration = dura;
         }
 

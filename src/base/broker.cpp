@@ -256,7 +256,7 @@ void Broker::open_a_trade(float price, int size, const struct order& order, floa
     trade.exit_price = 0;       //must
     trade.PNL = 0;
 
-    uprint::print("new trade", trade);
+    uprint::print("new   trade", trade);
     active_trades_.push_back(trade);
 }
 

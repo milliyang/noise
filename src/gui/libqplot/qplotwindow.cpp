@@ -14,7 +14,7 @@ QPlotWindow::QPlotWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle(tr("QPlot"));
-    resize(1920,1080);
+    //resize(3840,1800);
 }
 
 QPlotWindow::~QPlotWindow()

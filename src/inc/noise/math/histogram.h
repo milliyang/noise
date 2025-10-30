@@ -6,10 +6,12 @@
 namespace noise {
 namespace math {
 
+#define OVERFLOW_BIN_NUM  (5)
+
 class Histogram {
 
 public:
-    Histogram(int bin_size = 64);
+    Histogram(int bin_size = 64, bool limited = false);
     ~Histogram(void);
 
     void push(float value);
@@ -25,6 +27,9 @@ private:
     std::vector<int>    bin_;
     int                 idx_zero_;
     int                 bin_size_;
+
+    bool                limited_;
+    int                 overflow_bin_[OVERFLOW_BIN_NUM];   //100%~500%
 
     float   min_;
     float   max_;

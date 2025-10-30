@@ -44,8 +44,10 @@ void QPlot::plot(std::string filename, std::vector<PtrSeries> &seriess)
 
     qplot::QPlotWindow window;
     window.plot(seriess);
-    window.show();
-
+    //window.setWindowState(window.windowStatus() ^ Qt::WindowFullScreen);
+    //window.show();
+    //window.showFullScreen();
+    window.showMaximized();
     app.exec();
 }
 

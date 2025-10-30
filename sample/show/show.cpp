@@ -121,7 +121,7 @@ void StrategyShow::on_start(void)
     ma120_      = new ta::Ma(this,      "ma120", 120);
     stddev10_   = new ta::Stddev(this,  "stddev10", 15);
     boll_       = new ta::Boll(this,    "BOLL");
-    LOGI("on_start id:{} code:{}", id_, context_.feed->config_.code);
+    LOGI("on_start id:{} code:{}", id_, code_);
 }
 
 void StrategyShow::on_bar_start(void)

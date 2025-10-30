@@ -26,7 +26,7 @@ static std::string format_trade(const struct trade &trade)
         ratio = trade.profit();
     }
 
-    auto result = fmt::format("{} size:{:6d} entry({:0.2f} {:d}) exit({:0.2f} {:d}) PNL:{:+7.2f} profit:{:+7.2f}%",
+    auto result = fmt::format("{} size:{:6d} entry({:5.2f} {:d}) exit({:5.2f} {:d}) PNL:{:+7.2f} profit:{:+7.2f}%",
         trade.code,
         trade.size,
         trade.entry_price,

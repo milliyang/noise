@@ -47,6 +47,8 @@ void QFigure::init_figure(void)
     start_idx_ = end_idx_ - num + 1;
     cur_idx_ = (start_idx_ + end_idx_)/2;
     total_idx_len_ = num;
+
+    update_index(100.0f);
 }
 
 void QFigure::update_figure(void)

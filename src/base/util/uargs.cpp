@@ -14,11 +14,12 @@ const static char *args0_usage = "\n"                                   \
 "    >./bt -p 0                     //[0,1]                        \n"  \
 "    >./bt -c 300015.SZ             //code                         \n"  \
 "    >./bt -c xxx/000026.SZ.csv     //bar file                     \n"  \
-"    >./bt -m 100000.0              //init equity                  \n"  \
+"    >./bt -m 100000.0              //init equity moeny            \n"  \
 "    >./bt -f .code.csv             //codes                        \n"  \
 "    >./bt -f .code.csv -k10 -n200  //codes.skip(10).head(200)     \n"  \
 "    >./bt -f .code.csv -s0         //skip stat info               \n"  \
-";\n"                                                              \
+"    >./bt -d .chs.code.h5          //h5 dataset for batch         \n"  \
+";\n"                                                                   \
 ;
 
 /**
@@ -31,6 +32,7 @@ const static char *args0_usage = "\n"                                   \
  *   backtest codes files   -f
  *   num of code            -n
  *   skip num of code       -k
+ *   dataset for batch      -d
  *
  */
 int uargs::args0_parse(const char *title, int32_t argc, char** argv)
@@ -44,11 +46,12 @@ int uargs::args0_parse(const char *title, int32_t argc, char** argv)
     args::ValueFlag<std::string>    plot(parser,          " int ",     "GUI plot on finish",            {'p',  ARGS_PLOT});
     args::ValueFlag<std::string>    code(parser,          "code ",     "code",                          {'c',  ARGS_CODE});
     args::ValueFlag<std::string>    cash(parser,          "float",     "init cash money",               {'m',  ARGS_INIT_CASH});
-    args::ValueFlag<std::string>    date(parser,          "date ",     "begin date 20230101",           {'d',  ARGS_BEGIN_DATE});
+    args::ValueFlag<std::string>    date(parser,          "date ",     "begin date 20230101",           {'b',  ARGS_BEGIN_DATE});
     args::ValueFlag<std::string>    codefile(parser,      "file ",     "codes in file",                 {'f',  ARGS_CODE_FILE});
     args::ValueFlag<std::string>    num(parser,           " num ",     "codes.head(num)",               {'n',  ARGS_NUM});
     args::ValueFlag<std::string>    skip(parser,          "skip ",     "codes.skip(num)",               {'k',  ARGS_SKIP});
     args::ValueFlag<std::string>    stat(parser,          " int ",     "print stat info",               {'s',  ARGS_STAT});
+    args::ValueFlag<std::string>    dataset(parser,       "file ",     "h5 or code init file",          {'d',  ARGS_DATASET});
     args::Positional<std::string>   image_input(parser,   "image",     "input image");
 
     //TODO:
@@ -79,6 +82,9 @@ int uargs::args0_parse(const char *title, int32_t argc, char** argv)
         }
         if (stat) {
             param->args_map.emplace(ARGS_STAT, args::get(stat).c_str());
+        }
+        if (dataset) {
+            param->args_map.emplace(ARGS_DATASET, args::get(dataset).c_str());
         }
         if (ahelp) {
             std::cerr << parser;
